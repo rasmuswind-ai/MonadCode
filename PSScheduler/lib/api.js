@@ -184,6 +184,43 @@ router.delete('/history', (req, res) => {
   res.json({ ok: true });
 });
 
+// ── Chart data (last 42 hours, hourly buckets) ──────
+
+router.get('/history/chart', (req, res) => {
+  const now = new Date();
+  const hoursBack = 42;
+  const cutoff = new Date(now.getTime() - hoursBack * 60 * 60 * 1000);
+
+  // Create 42 hourly buckets
+  const buckets = [];
+  for (let i = hoursBack - 1; i >= 0; i--) {
+    const bucketTime = new Date(now.getTime() - i * 60 * 60 * 1000);
+    bucketTime.setMinutes(0, 0, 0);
+    buckets.push({
+      hour: bucketTime.toISOString().slice(0, 16),
+      success: 0,
+      warning: 0,
+      failed: 0
+    });
+  }
+
+  // Fill buckets from history
+  const recentHistory = req.db.history.filter(h => new Date(h.startTime) > cutoff);
+  for (const entry of recentHistory) {
+    const entryTime = new Date(entry.startTime);
+    entryTime.setMinutes(0, 0, 0);
+    const entryHour = entryTime.toISOString().slice(0, 16);
+    const bucket = buckets.find(b => b.hour === entryHour);
+    if (!bucket) continue;
+
+    if (entry.status === 'success') bucket.success++;
+    else if (entry.status === 'error') bucket.warning++;
+    else if (entry.status === 'failed') bucket.failed++;
+  }
+
+  res.json(buckets);
+});
+
 // ── Dashboard stats ──────────────────────────────────
 
 router.get('/stats', (req, res) => {

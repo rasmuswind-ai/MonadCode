@@ -1,7 +1,8 @@
 const fs = require('fs');
 const path = require('path');
+const { getDbPath } = require('./paths');
 
-const DB_PATH = path.join(__dirname, '..', 'data', 'monadcode.json');
+const DB_PATH = getDbPath();
 
 const DEFAULT_DB = {
   scripts: [],

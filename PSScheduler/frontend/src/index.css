@@ -40,3 +40,16 @@ body {
 .toggle input:checked + .slider::before {
   @apply translate-x-[18px] bg-white;
 }
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 4s ease-in-out infinite;
+}

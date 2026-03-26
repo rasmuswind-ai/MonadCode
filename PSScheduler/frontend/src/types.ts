@@ -39,4 +39,11 @@ export interface Stats {
   failures24h: number;
 }
 
+export interface ChartDataPoint {
+  hour: string;
+  success: number;
+  warning: number;
+  failed: number;
+}
+
 export type Page = 'dashboard' | 'scripts' | 'schedules' | 'history' | 'fat_fingers';

@@ -1,0 +1,133 @@
+{
+  "scripts": [
+    {
+      "id": "e8c23d05-afc4-4977-8070-fdf9a7143882",
+      "name": "Testing_Monad",
+      "path": "D:\\temp\\monadtest.ps1",
+      "description": "",
+      "timeoutSeconds": 300,
+      "createdAt": "2026-03-26T14:55:53.081Z"
+    }
+  ],
+  "schedules": [
+    {
+      "id": "8b6524ef-303e-40f8-92fd-bbe44d653a29",
+      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
+      "scriptName": "Testing_Monad",
+      "name": "Testing_Monad",
+      "cron": "*/5 * * * *",
+      "enabled": true,
+      "createdAt": "2026-03-26T14:56:56.699Z"
+    }
+  ],
+  "history": [
+    {
+      "id": "mn7li64b51x2",
+      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
+      "scriptName": "Testing_Monad",
+      "triggeredBy": "manual",
+      "startTime": "2026-03-26T14:56:26.747Z",
+      "endTime": "2026-03-26T14:56:27.002Z",
+      "status": "success",
+      "output": "MONAD TEST\n",
+      "error": "",
+      "exitCode": 0
+    },
+    {
+      "id": "mn7li4usa6uf",
+      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
+      "scriptName": "Testing_Monad",
+      "triggeredBy": "manual",
+      "startTime": "2026-03-26T14:56:25.108Z",
+      "endTime": "2026-03-26T14:56:25.363Z",
+      "status": "success",
+      "output": "MONAD TEST\n",
+      "error": "",
+      "exitCode": 0
+    },
+    {
+      "id": "mn7li3utfjb8",
+      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
+      "scriptName": "Testing_Monad",
+      "triggeredBy": "manual",
+      "startTime": "2026-03-26T14:56:23.813Z",
+      "endTime": "2026-03-26T14:56:24.057Z",
+      "status": "success",
+      "output": "MONAD TEST\n",
+      "error": "",
+      "exitCode": 0
+    },
+    {
+      "id": "mn7li2hwym8l",
+      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
+      "scriptName": "Testing_Monad",
+      "triggeredBy": "manual",
+      "startTime": "2026-03-26T14:56:22.052Z",
+      "endTime": "2026-03-26T14:56:22.302Z",
+      "status": "success",
+      "output": "MONAD TEST\n",
+      "error": "",
+      "exitCode": 0
+    },
+    {
+      "id": "mn7li17pnfw6",
+      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
+      "scriptName": "Testing_Monad",
+      "triggeredBy": "manual",
+      "startTime": "2026-03-26T14:56:20.389Z",
+      "endTime": "2026-03-26T14:56:20.650Z",
+      "status": "success",
+      "output": "MONAD TEST\n",
+      "error": "",
+      "exitCode": 0
+    },
+    {
+      "id": "mn7lhl4n784e",
+      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
+      "scriptName": "Testing_Monad",
+      "triggeredBy": "manual",
+      "startTime": "2026-03-26T14:55:59.543Z",
+      "endTime": "2026-03-26T14:56:00.357Z",
+      "status": "failed",
+      "output": "",
+      "error": "wriwadawte-host : The term 'wriwadawte-host' is not recognized as the name of a cmdlet, function, script file, or \r\noperable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try \r\nagain.\r\nAt D:\\temp\\monadtest.ps1:1 char:1\r\n+ wriwadawte-host \"MONAD TEST\"\r\n+ ~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : ObjectNotFound: (wriwadawte-host:String) [], CommandNotFoundException\r\n    + FullyQualifiedErrorId : CommandNotFoundException\r\n \r\n",
+      "exitCode": 0
+    },
+    {
+      "id": "mn7lhjf5c6uf",
+      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
+      "scriptName": "Testing_Monad",
+      "triggeredBy": "manual",
+      "startTime": "2026-03-26T14:55:57.329Z",
+      "endTime": "2026-03-26T14:55:58.152Z",
+      "status": "failed",
+      "output": "",
+      "error": "wriwadawte-host : The term 'wriwadawte-host' is not recognized as the name of a cmdlet, function, script file, or \r\noperable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try \r\nagain.\r\nAt D:\\temp\\monadtest.ps1:1 char:1\r\n+ wriwadawte-host \"MONAD TEST\"\r\n+ ~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : ObjectNotFound: (wriwadawte-host:String) [], CommandNotFoundException\r\n    + FullyQualifiedErrorId : CommandNotFoundException\r\n \r\n",
+      "exitCode": 0
+    },
+    {
+      "id": "mn7lhhzs5oqr",
+      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
+      "scriptName": "Testing_Monad",
+      "triggeredBy": "manual",
+      "startTime": "2026-03-26T14:55:55.480Z",
+      "endTime": "2026-03-26T14:55:56.321Z",
+      "status": "failed",
+      "output": "",
+      "error": "wriwadawte-host : The term 'wriwadawte-host' is not recognized as the name of a cmdlet, function, script file, or \r\noperable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try \r\nagain.\r\nAt D:\\temp\\monadtest.ps1:1 char:1\r\n+ wriwadawte-host \"MONAD TEST\"\r\n+ ~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : ObjectNotFound: (wriwadawte-host:String) [], CommandNotFoundException\r\n    + FullyQualifiedErrorId : CommandNotFoundException\r\n \r\n",
+      "exitCode": 0
+    },
+    {
+      "id": "mn7lhh6qgehz",
+      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
+      "scriptName": "Testing_Monad",
+      "triggeredBy": "manual",
+      "startTime": "2026-03-26T14:55:54.434Z",
+      "endTime": "2026-03-26T14:55:55.268Z",
+      "status": "failed",
+      "output": "",
+      "error": "wriwadawte-host : The term 'wriwadawte-host' is not recognized as the name of a cmdlet, function, script file, or \r\noperable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try \r\nagain.\r\nAt D:\\temp\\monadtest.ps1:1 char:1\r\n+ wriwadawte-host \"MONAD TEST\"\r\n+ ~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : ObjectNotFound: (wriwadawte-host:String) [], CommandNotFoundException\r\n    + FullyQualifiedErrorId : CommandNotFoundException\r\n \r\n",
+      "exitCode": 0
+    }
+  ]
+}

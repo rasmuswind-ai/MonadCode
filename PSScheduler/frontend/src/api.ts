@@ -1,4 +1,4 @@
-import type { Script, Schedule, HistoryEntry, Stats } from './types';
+import type { Script, Schedule, HistoryEntry, Stats, ChartDataPoint } from './types';
 
 const BASE = '/api';
 
@@ -48,4 +48,7 @@ export const api = {
   },
   clearHistory: () =>
     request<{ ok: boolean }>('/history', { method: 'DELETE' }),
+
+  // Chart
+  getChartData: () => request<ChartDataPoint[]>('/history/chart'),
 };

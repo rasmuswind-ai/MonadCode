@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dashboard } from './pages/Dashboard';
+import { Home } from './pages/Home';
 import { Scripts } from './pages/Scripts';
 import { Schedules } from './pages/Schedules';
 import { History } from './pages/History';
@@ -18,7 +18,7 @@ export default function App() {
 
   const renderPage = () => {
     switch (page) {
-      case 'dashboard': return <Dashboard />;
+      case 'dashboard': return <Home />;
       case 'scripts': return <Scripts />;
       case 'schedules': return <Schedules />;
       case 'history': return <History />;

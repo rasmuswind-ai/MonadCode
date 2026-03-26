@@ -1,2 +1,0 @@
-2026-03-26 13:41:30 - Starting C:\Program Files\nodejs\node.exe  D:\CLAUDE_CODE\PSScheduler\node_modules\node-windows\lib\wrapper.js --file D:\CLAUDE_CODE\PSScheduler\server.js --scriptoptions= --log "Monad Code wrapper" --grow 0.25 --wait 1 --maxrestarts 3 --abortonerror n --stopparentfirst undefined
-2026-03-26 13:41:30 - Started 14564
