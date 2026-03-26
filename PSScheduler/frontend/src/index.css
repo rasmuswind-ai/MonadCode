@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0f1117;
+  --color-surface: #1a1d27;
+  --color-surface2: #242734;
+  --color-border: #2e3144;
+  --color-text: #e1e4ed;
+  --color-dim: #8b8fa3;
+  --color-primary: #fbc79d;
+  --color-primary-hover: #dcae89;
+  --color-success: #34d399;
+  --color-danger: #f87171;
+  --color-warning: #fbbf24;
+  --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Cascadia Code', 'Consolas', monospace;
+}
+
+body {
+  @apply bg-bg text-text font-sans min-h-screen;
+}
+
+/* Toggle switch - too complex for pure utility classes */
+.toggle {
+  @apply relative inline-block w-10 h-[22px];
+}
+.toggle input {
+  @apply opacity-0 w-0 h-0 absolute;
+}
+.toggle .slider {
+  @apply absolute inset-0 bg-surface2 rounded-full cursor-pointer transition-all duration-200 border border-border;
+}
+.toggle .slider::before {
+  content: '';
+  @apply absolute w-4 h-4 left-0.5 top-0.5 bg-dim rounded-full transition-all duration-200;
+}
+.toggle input:checked + .slider {
+  @apply bg-primary border-primary;
+}
+.toggle input:checked + .slider::before {
+  @apply translate-x-[18px] bg-white;
+}

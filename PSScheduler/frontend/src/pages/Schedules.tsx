@@ -1,0 +1,161 @@
+import { useEffect, useState } from 'react';
+import { api } from '../api';
+import { Modal } from '../components/Modal';
+import type { Schedule, Script } from '../types';
+
+const thClass = 'text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-dim bg-surface2 border-b border-border';
+const tdClass = 'px-4 py-3 text-sm border-b border-border align-middle';
+const btnBase = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border bg-surface2 text-text text-sm font-medium cursor-pointer transition-all hover:border-primary hover:text-primary';
+const btnDanger = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-danger text-danger text-sm font-medium cursor-pointer transition-all hover:bg-danger hover:text-white';
+const btnPrimary = 'inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary border border-primary text-white text-sm font-medium cursor-pointer transition-all hover:bg-primary-hover hover:border-primary-hover disabled:opacity-50 disabled:cursor-not-allowed';
+const inputClass = 'w-full px-3 py-2 rounded-md border border-border bg-bg text-text text-sm font-sans outline-none transition-colors focus:border-primary';
+
+export function Schedules() {
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [scripts, setScripts] = useState<Script[]>([]);
+  const [showAdd, setShowAdd] = useState(false);
+  const [error, setError] = useState('');
+
+  const load = () => {
+    api.getSchedules().then(setSchedules);
+    api.getScripts().then(setScripts);
+  };
+  useEffect(load, []);
+
+  const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError('');
+    const form = new FormData(e.currentTarget);
+    try {
+      await api.createSchedule({
+        scriptId: form.get('scriptId') as string,
+        cron: form.get('cron') as string,
+        name: form.get('name') as string,
+        enabled: true,
+      });
+      setShowAdd(false);
+      load();
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const handleToggle = async (sched: Schedule) => {
+    await api.updateSchedule(sched.id, { enabled: !sched.enabled });
+    load();
+  };
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Delete schedule "${name}"?`)) return;
+    await api.deleteSchedule(id);
+    load();
+  };
+
+  const handleEditCron = async (sched: Schedule) => {
+    const newCron = prompt('Enter new cron expression:', sched.cron);
+    if (!newCron || newCron === sched.cron) return;
+    try {
+      await api.updateSchedule(sched.id, { cron: newCron });
+      load();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  return (
+    <>
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
+        <h2 className="text-xl font-semibold flex-1 mb-0">Schedules</h2>
+        <button
+          className={btnPrimary}
+          onClick={() => { setError(''); setShowAdd(true); }}
+          disabled={scripts.length === 0}
+        >
+          + Add Schedule
+        </button>
+      </div>
+
+      {scripts.length === 0 && (
+        <div className="text-center py-12 text-dim">Add a script first before creating schedules.</div>
+      )}
+
+      <div className="bg-surface border border-border rounded-[10px] overflow-hidden">
+        {schedules.length === 0 && scripts.length > 0 ? (
+          <div className="text-center py-12 text-dim">
+            <p className="mb-4">No schedules yet.</p>
+            <button className={btnPrimary} onClick={() => setShowAdd(true)}>Create your first schedule</button>
+          </div>
+        ) : (
+          <table className="w-full border-collapse">
+            <thead>
+              <tr>
+                {['Enabled', 'Name', 'Script', 'Cron', 'Actions'].map(h => (
+                  <th key={h} className={thClass}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {schedules.map(s => (
+                <tr key={s.id} className="hover:bg-primary/[0.04]">
+                  <td className={tdClass}>
+                    <label className="toggle">
+                      <input type="checkbox" checked={s.enabled} onChange={() => handleToggle(s)} />
+                      <span className="slider"></span>
+                    </label>
+                  </td>
+                  <td className={tdClass}>{s.name}</td>
+                  <td className={`${tdClass} text-dim`}>{s.scriptName}</td>
+                  <td className={tdClass}>
+                    <code
+                      className="font-mono text-xs cursor-pointer hover:text-primary transition-colors"
+                      onClick={() => handleEditCron(s)}
+                    >
+                      {s.cron}
+                    </code>
+                  </td>
+                  <td className={tdClass}>
+                    <div className="flex gap-1.5">
+                      <button className={btnBase} onClick={() => handleEditCron(s)}>Edit Cron</button>
+                      <button className={btnDanger} onClick={() => handleDelete(s.id, s.name)}>Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {showAdd && (
+        <Modal title="Add Schedule" onClose={() => setShowAdd(false)}>
+          <form onSubmit={handleAdd}>
+            <div className="mb-4">
+              <label className="block text-xs font-semibold text-dim mb-1">Schedule Name</label>
+              <input name="name" placeholder="Daily cleanup" className={inputClass} />
+            </div>
+            <div className="mb-4">
+              <label className="block text-xs font-semibold text-dim mb-1">Script</label>
+              <select name="scriptId" required className={inputClass}>
+                <option value="">Select a script...</option>
+                {scripts.map(s => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="mb-4">
+              <label className="block text-xs font-semibold text-dim mb-1">Cron Expression</label>
+              <input name="cron" required placeholder="*/5 * * * *" className={inputClass} />
+              <div className="text-xs text-dim mt-1">
+                Examples: <code className="font-mono text-xs">*/5 * * * *</code> (every 5 min),{' '}
+                <code className="font-mono text-xs">0 9 * * *</code> (daily 9am),{' '}
+                <code className="font-mono text-xs">0 0 * * 0</code> (weekly Sunday midnight)
+              </div>
+            </div>
+            {error && <div className="text-danger text-sm mb-3">{error}</div>}
+            <button type="submit" className={btnPrimary}>Create Schedule</button>
+          </form>
+        </Modal>
+      )}
+    </>
+  );
+}

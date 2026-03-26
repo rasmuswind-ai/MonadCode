@@ -1,0 +1,19 @@
+{
+  "name": "monadcode",
+  "version": "1.0.0",
+  "description": "Lightweight PowerShell script scheduler with web UI",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "install-service": "node service-install.js",
+    "uninstall-service": "node service-uninstall.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "lucide-react": "^1.7.0",
+    "node-cron": "^3.0.3",
+    "node-windows": "^1.0.0-beta.8",
+    "react-router-dom": "^7.13.2",
+    "uuid": "^10.0.0"
+  }
+}

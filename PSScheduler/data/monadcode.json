@@ -1,0 +1,27 @@
+{
+  "scripts": [
+    {
+      "id": "e27b4b30-3b0f-4124-9b21-7dbd4bf3c591",
+      "name": "Testing_Monad",
+      "path": "D:\\temp\\monadtest.ps1",
+      "description": "",
+      "timeoutSeconds": 300,
+      "createdAt": "2026-03-26T12:41:48.843Z"
+    }
+  ],
+  "schedules": [],
+  "history": [
+    {
+      "id": "mn7gp25w8jbs",
+      "scriptId": "e27b4b30-3b0f-4124-9b21-7dbd4bf3c591",
+      "scriptName": "Testing_Monad",
+      "triggeredBy": "manual",
+      "startTime": "2026-03-26T12:41:50.132Z",
+      "endTime": "2026-03-26T12:41:51.078Z",
+      "status": "failed",
+      "output": "",
+      "error": "wriwwwte-host : The term 'wriwwwte-host' is not recognized as the name of a cmdlet, function, script file, or operable \r\nprogram. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.\r\nAt D:\\temp\\monadtest.ps1:1 char:1\r\n+ wriwwwte-host \"MONAD TEST\"\r\n+ ~~~~~~~~~~~~~\r\n    + CategoryInfo          : ObjectNotFound: (wriwwwte-host:String) [], CommandNotFoundException\r\n    + FullyQualifiedErrorId : CommandNotFoundException\r\n \r\n",
+      "exitCode": 0
+    }
+  ]
+}
