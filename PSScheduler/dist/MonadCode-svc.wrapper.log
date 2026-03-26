@@ -1,2 +1,12 @@
 2026-03-26 15:55:25 - Starting D:\CLAUDE_CODE\PSScheduler\dist\monadcode.exe  run
 2026-03-26 15:55:25 - Started 78836
+2026-03-26 16:00:30 - Stopping MonadCode
+2026-03-26 16:00:30 - ProcessKill 78836
+2026-03-26 16:00:30 - Found child process: 73548 Name: conhost.exe
+2026-03-26 16:00:30 - Stopping process 73548
+2026-03-26 16:00:30 - Send SIGINT 73548
+2026-03-26 16:00:30 - SIGINT to 73548 failed - Killing as fallback
+2026-03-26 16:00:30 - Stopping process 78836
+2026-03-26 16:00:30 - Send SIGINT 78836
+2026-03-26 16:00:30 - SIGINT to 78836 failed - Killing as fallback
+2026-03-26 16:00:30 - Finished MonadCode

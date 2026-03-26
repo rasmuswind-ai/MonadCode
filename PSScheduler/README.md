@@ -22,18 +22,19 @@ node server.js
 start http://127.0.0.1:5088
 ```
 
-## Install as Windows Service
+## Install Monad Code
 
-Run as Administrator:
+Download the exe file from the repo.
+Run your desired teminal as Administrator:
 
 ```bash
-npm run install-service
+.\monadcode.exe install
 ```
 
-To remove the service:
+To remove the Monad Code:
 
 ```bash
-npm run uninstall-service
+.\monadcode.exe uninstall
 ```
 
 ## Configuration

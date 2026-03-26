@@ -22,6 +22,18 @@
   ],
   "history": [
     {
+      "id": "mn7lmr1kh1ml",
+      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
+      "scriptName": "Testing_Monad",
+      "triggeredBy": "8b6524ef-303e-40f8-92fd-bbe44d653a29",
+      "startTime": "2026-03-26T15:00:00.488Z",
+      "endTime": "2026-03-26T15:00:00.751Z",
+      "status": "success",
+      "output": "MONAD TEST\n",
+      "error": "",
+      "exitCode": 0
+    },
+    {
       "id": "mn7li64b51x2",
       "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
       "scriptName": "Testing_Monad",
