@@ -72,7 +72,7 @@ export default function App() {
               </div>
             </div>
         </nav>
-        <main className='flex-1 min-w-0'>
+        <main className='flex-1 min-w-0 min-h-0 pb-16 md:pb-0'>
           {renderPage()}
         </main>
       </div>

@@ -3,11 +3,10 @@ import { api } from '../api';
 import { Modal } from '../components/Modal';
 import type { Schedule, Script } from '../types';
 
-const thClass = 'text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-dim bg-surface2 border-b border-border';
 const tdClass = 'px-4 py-3 text-sm border-b border-border align-middle';
-const btnBase = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border bg-surface2 text-text text-sm font-medium cursor-pointer transition-all hover:border-primary hover:text-primary';
-const btnDanger = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-danger text-danger text-sm font-medium cursor-pointer transition-all hover:bg-danger hover:text-white';
-const btnPrimary = 'inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary border border-primary text-white text-sm font-medium cursor-pointer transition-all hover:bg-primary-hover hover:border-primary-hover disabled:opacity-50 disabled:cursor-not-allowed';
+const btnBase = 'cursor-pointer ml-auto sm:ml-2 px-2.5 py-1 text-[11px] rounded bg-stone-900 border border-stone-800 text-stone-100 tracking-wider hover:bg-stone-800 hover:text-stone-100 transition-colors disabled:opacity-40';
+const btnDanger = 'cursor-pointer ml-auto sm:ml-2 px-2.5 py-1 text-[11px] rounded bg-red-900 border border-stone-800 hover:border-red-400 text-stone-100 tracking-wider hover:bg-red-800 hover:text-stone-100 transition-colors disabled:opacity-40';
+const btnPrimary = 'inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary border border-primary text-black text-sm font-medium cursor-pointer transition-all hover:bg-primary-hover hover:border-primary-hover disabled:opacity-50 disabled:cursor-not-allowed';
 const inputClass = 'w-full px-3 py-2 rounded-md border border-border bg-bg text-text text-sm font-sans outline-none transition-colors focus:border-primary';
 
 export function Schedules() {
@@ -64,98 +63,116 @@ export function Schedules() {
 
   return (
     <>
-      <div className="flex items-center gap-2 mb-4 flex-wrap">
-        <h2 className="text-xl font-semibold flex-1 mb-0">Schedules</h2>
-        <button
-          className={btnPrimary}
-          onClick={() => { setError(''); setShowAdd(true); }}
-          disabled={scripts.length === 0}
-        >
-          + Add Schedule
-        </button>
+    <div className="h-full sm:h-[100dvh] sm:flex-1 sm:min-h-0 relative overflow-hidden flex flex-col p-4 pb-4">
+      <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 -z-10">
+        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-orange-800 opacity-25 rounded-full blur-[175px] -translate-x-1/3 -translate-y-1/3" />
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-orange-800 opacity-15 rounded-full blur-[200px] translate-y-1/3" />
       </div>
 
-      {scripts.length === 0 && (
-        <div className="text-center py-12 text-dim">Add a script first before creating schedules.</div>
-      )}
-
-      <div className="bg-surface border border-border rounded-[10px] overflow-hidden">
-        {schedules.length === 0 && scripts.length > 0 ? (
-          <div className="text-center py-12 text-dim">
-            <p className="mb-4">No schedules yet.</p>
-            <button className={btnPrimary} onClick={() => setShowAdd(true)}>Create your first schedule</button>
+      <div className="relative flex-1 flex flex-col bg-black/50 border border-white/10 rounded-2xl p-4 sm:p-6 shadow-2xl min-h-0 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+          <div className="flex items-center gap-2 mr-auto">
+            <h2 className="ml-2 sm:ml-4 text-xl sm:text-2xl font-bold bg-gradient-to-r from-stone-600 via-stone-400 to-stone-600 bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
+              SCHEDULES
+            </h2>
           </div>
-        ) : (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                {['Enabled', 'Name', 'Script', 'Cron', 'Actions'].map(h => (
-                  <th key={h} className={thClass}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {schedules.map(s => (
-                <tr key={s.id} className="hover:bg-primary/[0.04]">
-                  <td className={tdClass}>
-                    <label className="toggle">
-                      <input type="checkbox" checked={s.enabled} onChange={() => handleToggle(s)} />
-                      <span className="slider"></span>
-                    </label>
-                  </td>
-                  <td className={tdClass}>{s.name}</td>
-                  <td className={`${tdClass} text-dim`}>{s.scriptName}</td>
-                  <td className={tdClass}>
-                    <code
-                      className="font-mono text-xs cursor-pointer hover:text-primary transition-colors"
-                      onClick={() => handleEditCron(s)}
-                    >
-                      {s.cron}
-                    </code>
-                  </td>
-                  <td className={tdClass}>
-                    <div className="flex gap-1.5">
-                      <button className={btnBase} onClick={() => handleEditCron(s)}>Edit Cron</button>
-                      <button className={btnDanger} onClick={() => handleDelete(s.id, s.name)}>Delete</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+          <div className="flex items-center gap-3 text-[11px] text-stone-400 ml-2 sm:ml-0">
+            <button
+              onClick={() => setShowAdd(true)}
+              className="cursor-pointer ml-auto sm:ml-2 px-2.5 py-1 text-[11px] rounded bg-stone-900 border border-stone-800 text-stone-400 tracking-wider hover:bg-stone-800 hover:text-stone-300 transition-colors disabled:opacity-40"
+            >
+              + Add Script
+            </button>
+          </div>
+        </div>
 
-      {showAdd && (
-        <Modal title="Add Schedule" onClose={() => setShowAdd(false)}>
-          <form onSubmit={handleAdd}>
-            <div className="mb-4">
-              <label className="block text-xs font-semibold text-dim mb-1">Schedule Name</label>
-              <input name="name" placeholder="Daily cleanup" className={inputClass} />
-            </div>
-            <div className="mb-4">
-              <label className="block text-xs font-semibold text-dim mb-1">Script</label>
-              <select name="scriptId" required className={inputClass}>
-                <option value="">Select a script...</option>
-                {scripts.map(s => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="mb-4">
-              <label className="block text-xs font-semibold text-dim mb-1">Cron Expression</label>
-              <input name="cron" required placeholder="*/5 * * * *" className={inputClass} />
-              <div className="text-xs text-dim mt-1">
-                Examples: <code className="font-mono text-xs">*/5 * * * *</code> (every 5 min),{' '}
-                <code className="font-mono text-xs">0 9 * * *</code> (daily 9am),{' '}
-                <code className="font-mono text-xs">0 0 * * 0</code> (weekly Sunday midnight)
+        <div className="mt-4 border-t border-white/10" />
+
+        <div className="mt-6 border border-stone-800 rounded-lg backdrop-blur-md bg-stone-900/30 overflow-y-auto custom-scrollbar">
+          {scripts.length === 0 && (
+            <div className="text-center py-12 text-dim">Add a script first before creating schedules.</div>
+          )}
+
+          <div className="bg-surface rounded-[10px] overflow-hidden">
+            {schedules.length === 0 && scripts.length > 0 ? (
+              <div className="text-center py-12 text-dim">
+                <p className="mb-4">No schedules yet.</p>
+                <button className={btnPrimary} onClick={() => setShowAdd(true)}>Create your first schedule</button>
               </div>
-            </div>
-            {error && <div className="text-danger text-sm mb-3">{error}</div>}
-            <button type="submit" className={btnPrimary}>Create Schedule</button>
-          </form>
-        </Modal>
-      )}
+            ) : (
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr>
+                    {['Enabled', 'Name', 'Script', 'Cron', 'Actions'].map(h => (
+                    <th key={h} className="text-left px-4 py-3 uppercase text-[11px] tracking-wide transition-colors bg-stone-400 text-stone-700">{h}</th>
+                  ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {schedules.map(s => (
+                    <tr key={s.id} className="hover:bg-primary/[0.04]">
+                      <td className={tdClass}>
+                        <label className="toggle">
+                          <input type="checkbox" checked={s.enabled} onChange={() => handleToggle(s)} />
+                          <span className="slider"></span>
+                        </label>
+                      </td>
+                      <td className={tdClass}>{s.name}</td>
+                      <td className={`${tdClass} text-dim`}>{s.scriptName}</td>
+                      <td className={tdClass}>
+                        <code
+                          className="font-mono text-xs cursor-pointer hover:text-primary transition-colors"
+                          onClick={() => handleEditCron(s)}
+                        >
+                          {s.cron}
+                        </code>
+                      </td>
+                      <td className={tdClass}>
+                        <div className="flex gap-1.5">
+                          <button className={btnBase} onClick={() => handleEditCron(s)}>Edit Cron</button>
+                          <button className={btnDanger} onClick={() => handleDelete(s.id, s.name)}>Delete</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+
+        {showAdd && (
+          <Modal title="Add Schedule" onClose={() => setShowAdd(false)}>
+            <form onSubmit={handleAdd}>
+              <div className="mb-4">
+                <label className="block text-xs font-semibold text-dim mb-1">Schedule Name</label>
+                <input name="name" placeholder="Daily cleanup" className={inputClass} />
+              </div>
+              <div className="mb-4">
+                <label className="block text-xs font-semibold text-dim mb-1">Script</label>
+                <select name="scriptId" required className={inputClass}>
+                  <option value="">Select a script...</option>
+                  {scripts.map(s => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="mb-4">
+                <label className="block text-xs font-semibold text-dim mb-1">Cron Expression</label>
+                <input name="cron" required placeholder="*/5 * * * *" className={inputClass} />
+                <div className="text-xs text-dim mt-1">
+                  Examples: <code className="font-mono text-xs">*/5 * * * *</code> (every 5 min),{' '}
+                  <code className="font-mono text-xs">0 9 * * *</code> (daily 9am),{' '}
+                  <code className="font-mono text-xs">0 0 * * 0</code> (weekly Sunday midnight)
+                </div>
+              </div>
+              {error && <div className="text-danger text-sm mb-3">{error}</div>}
+              <button type="submit" className={btnPrimary}>Create Schedule</button>
+            </form>
+          </Modal>
+        )}
+        </div>
+      </div>
     </>
   );
 }

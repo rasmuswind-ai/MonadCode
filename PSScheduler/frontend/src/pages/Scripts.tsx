@@ -3,8 +3,8 @@ import { api } from '../api';
 import { Modal } from '../components/Modal';
 import type { Script } from '../types';
 
-const btnBase = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border bg-surface2 text-text text-sm font-medium cursor-pointer transition-all hover:border-primary hover:text-primary';
-const btnDanger = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-danger text-danger text-sm font-medium cursor-pointer transition-all hover:bg-danger hover:text-white';
+const btnBase = 'cursor-pointer ml-auto sm:ml-2 px-2.5 py-1 text-[11px] rounded bg-stone-900 border border-stone-800 text-stone-100 tracking-wider hover:bg-stone-800 hover:text-stone-100 transition-colors disabled:opacity-40';
+const btnDanger = 'cursor-pointer ml-auto sm:ml-2 px-2.5 py-1 text-[11px] rounded bg-red-900 border border-stone-800 hover:border-red-400 text-stone-100 tracking-wider hover:bg-red-800 hover:text-stone-100 transition-colors disabled:opacity-40';
 
 export function Scripts() {
   const [scripts, setScripts] = useState<Script[]>([]);
@@ -75,18 +75,34 @@ export function Scripts() {
 
   return (
     <>
-      <div className="flex items-center gap-2 mb-4 flex-wrap">
-        <h2 className="text-xl font-semibold flex-1 mb-0">Scripts</h2>
-        <button
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary border border-primary text-white text-sm font-medium cursor-pointer transition-all hover:bg-primary-hover hover:border-primary-hover"
-          onClick={() => { setError(''); setShowAdd(true); }}
-        >
-          + Add Script
-        </button>
+    <div className="h-full sm:h-[100dvh] sm:flex-1 sm:min-h-0 relative overflow-hidden flex flex-col p-4 pb-4">
+      <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 -z-10">
+        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-orange-800 opacity-25 rounded-full blur-[175px] -translate-x-1/3 -translate-y-1/3" />
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-orange-800 opacity-15 rounded-full blur-[200px] translate-y-1/3" />
       </div>
 
-      <div className="bg-surface border border-border rounded-[10px] overflow-hidden">
+      <div className="relative flex-1 flex flex-col bg-black/50 border border-white/10 rounded-2xl p-4 sm:p-6 shadow-2xl min-h-0 mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+          <div className="flex items-center gap-2 mr-auto">
+            <h2 className="ml-2 sm:ml-4 text-xl sm:text-2xl font-bold bg-gradient-to-r from-stone-600 via-stone-400 to-stone-600 bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
+              SCRIPTS
+            </h2>
+          </div>
+          <div className="flex items-center gap-3 text-[11px] text-stone-400 ml-2 sm:ml-0">
+            <button
+              onClick={() => setShowAdd(true)}
+              className="cursor-pointer ml-auto sm:ml-2 px-2.5 py-1 text-[11px] rounded bg-stone-900 border border-stone-800 text-stone-400 tracking-wider hover:bg-stone-800 hover:text-stone-300 transition-colors disabled:opacity-40"
+            >
+              + Add Script
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-4 border-t border-white/10" />
+
+        <div className="mt-6 border border-stone-800 rounded-lg backdrop-blur-md bg-stone-900/30 overflow-y-auto custom-scrollbar">
         {scripts.length === 0 ? (
+
           <div className="text-center py-12 text-dim">
             <p className="mb-4">No scripts registered yet.</p>
             <button
@@ -101,7 +117,7 @@ export function Scripts() {
             <thead>
               <tr>
                 {['Name', 'Path', 'Timeout', 'Actions'].map(h => (
-                  <th key={h} className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide text-dim bg-surface2 border-b border-border">{h}</th>
+                    <th key={h} className="text-left px-4 py-3 uppercase text-[11px] tracking-wide transition-colors bg-stone-400 text-stone-700">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -129,6 +145,7 @@ export function Scripts() {
         )}
       </div>
 
+
       {showAdd && (
         <Modal title="Add Script" onClose={() => setShowAdd(false)}>
           <ScriptForm onSubmit={handleAdd} error={error} />
@@ -148,6 +165,11 @@ export function Scripts() {
           </pre>
         </Modal>
       )}
+        </div>
+      </div>
+
+    
+
     </>
   );
 }
@@ -161,7 +183,7 @@ function ScriptForm({
   error: string;
   initial?: Script;
 }) {
-  const inputClass = 'w-full px-3 py-2 rounded-md border border-border bg-bg text-text text-sm font-sans outline-none transition-colors focus:border-primary';
+  const inputClass = 'w-full px-3 py-2 rounded-md bg-stone-900 border border-stone-800 text-text text-sm outline-none transition-colors focus:border-stone-400';
 
   return (
     <form onSubmit={onSubmit}>
@@ -185,7 +207,7 @@ function ScriptForm({
       {error && <div className="text-danger text-sm mb-3">{error}</div>}
       <button
         type="submit"
-        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary border border-primary text-white text-sm font-medium cursor-pointer transition-all hover:bg-primary-hover hover:border-primary-hover"
+        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary border border-primary text-black text-sm font-medium cursor-pointer transition-all hover:bg-primary-hover hover:border-primary-hover"
       >
         {initial ? 'Save' : 'Add Script'}
       </button>

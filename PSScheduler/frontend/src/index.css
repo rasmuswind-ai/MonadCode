@@ -2,13 +2,13 @@
 
 @theme {
   --color-bg: #0f1117;
-  --color-surface: #1a1d27;
-  --color-surface2: #242734;
+  --color-surface: #070409;
+  --color-surface2: #0F0A0B;
   --color-border: #2e3144;
   --color-text: #e1e4ed;
   --color-dim: #8b8fa3;
-  --color-primary: #fbc79d;
-  --color-primary-hover: #dcae89;
+  --color-primary: #A6A09B;
+  --color-primary-hover: #d5cec8;
   --color-success: #34d399;
   --color-danger: #f87171;
   --color-warning: #fbbf24;
@@ -35,7 +35,7 @@ body {
   @apply absolute w-4 h-4 left-0.5 top-0.5 bg-dim rounded-full transition-all duration-200;
 }
 .toggle input:checked + .slider {
-  @apply bg-primary border-primary;
+  @apply bg-green-500;
 }
 .toggle input:checked + .slider::before {
   @apply translate-x-[18px] bg-white;
@@ -52,4 +52,28 @@ body {
 
 .animate-shimmer {
   animation: shimmer 4s ease-in-out infinite;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
 }

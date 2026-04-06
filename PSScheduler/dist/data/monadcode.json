@@ -1,145 +1,270 @@
 {
   "scripts": [
     {
-      "id": "e8c23d05-afc4-4977-8070-fdf9a7143882",
+      "id": "d602aaab-9088-4418-8bcc-55706193c6ce",
       "name": "Testing_Monad",
       "path": "D:\\temp\\monadtest.ps1",
       "description": "",
       "timeoutSeconds": 300,
-      "createdAt": "2026-03-26T14:55:53.081Z"
+      "createdAt": "2026-03-28T09:41:03.407Z"
+    },
+    {
+      "id": "5eca2b71-2739-47d0-b8aa-5b0b851dcf47",
+      "name": "Testing_Monad",
+      "path": "D:\\temp\\monadtest.ps1",
+      "description": "",
+      "timeoutSeconds": 300,
+      "createdAt": "2026-03-28T09:41:09.613Z"
+    },
+    {
+      "id": "672e5905-9dc2-4798-bdf6-af9be9e3e34b",
+      "name": "Testing_Monad",
+      "path": "D:\\temp\\monadtest.ps1",
+      "description": "",
+      "timeoutSeconds": 300,
+      "createdAt": "2026-03-28T09:41:14.397Z"
+    },
+    {
+      "id": "488b23e3-275a-48d1-82cd-e2d98cd48afa",
+      "name": "Testing_Monad",
+      "path": "D:\\temp\\monadtest.ps1",
+      "description": "",
+      "timeoutSeconds": 300,
+      "createdAt": "2026-03-28T09:47:13.222Z"
+    },
+    {
+      "id": "71960133-0aeb-4942-b394-cbbd2ec0b15f",
+      "name": "Testing_Monad",
+      "path": "D:\\temp\\monadtest.ps1",
+      "description": "",
+      "timeoutSeconds": 300,
+      "createdAt": "2026-03-28T09:47:16.912Z"
+    },
+    {
+      "id": "80d09d8e-1f3f-4d37-9e71-1e69104b2bf2",
+      "name": "Testing_Monad",
+      "path": "D:\\temp\\monadtest.ps1",
+      "description": "",
+      "timeoutSeconds": 300,
+      "createdAt": "2026-03-28T09:47:20.419Z"
+    },
+    {
+      "id": "8c9f3730-8fcf-489d-8b6c-052dad89a829",
+      "name": "Testing_Monad",
+      "path": "D:\\temp\\monadtest.ps1",
+      "description": "",
+      "timeoutSeconds": 300,
+      "createdAt": "2026-03-28T09:47:23.753Z"
+    },
+    {
+      "id": "c920e7c1-35f1-4de0-a65c-5dd22f3d18f8",
+      "name": "Testing_Monad",
+      "path": "D:\\temp\\monadtest.ps1",
+      "description": "",
+      "timeoutSeconds": 300,
+      "createdAt": "2026-03-28T09:47:27.392Z"
+    },
+    {
+      "id": "994d3c2d-8748-4985-a5d8-21f42b312f7a",
+      "name": "Testing_Monad",
+      "path": "D:\\temp\\monadtest.ps1",
+      "description": "",
+      "timeoutSeconds": 300,
+      "createdAt": "2026-03-28T09:47:30.831Z"
+    },
+    {
+      "id": "d6ba5057-41dd-42fe-a8d3-be4be9b5edc9",
+      "name": "Testing_Monad",
+      "path": "D:\\temp\\monadtest.ps1",
+      "description": "",
+      "timeoutSeconds": 300,
+      "createdAt": "2026-03-28T09:47:37.730Z"
+    },
+    {
+      "id": "913f4c89-bb15-4baf-ba7b-639ab102b19c",
+      "name": "Testing_Monad",
+      "path": "D:\\temp\\monadtest.ps1",
+      "description": "",
+      "timeoutSeconds": 300,
+      "createdAt": "2026-03-28T09:47:41.157Z"
+    },
+    {
+      "id": "637b27e0-05d2-4daf-81ab-72f18e3b7708",
+      "name": "Testing_Monad",
+      "path": "D:\\temp\\monadtest.ps1",
+      "description": "",
+      "timeoutSeconds": 300,
+      "createdAt": "2026-03-28T09:47:45.284Z"
+    },
+    {
+      "id": "bdf6c177-d773-41e4-ba7d-7e98defd9884",
+      "name": "Testing_Monad",
+      "path": "D:\\temp\\monadtest.ps1",
+      "description": "",
+      "timeoutSeconds": 300,
+      "createdAt": "2026-03-28T09:47:54.994Z"
+    },
+    {
+      "id": "92eb09ec-2043-44a1-8b18-2a761f18645c",
+      "name": "Testing_Monad",
+      "path": "D:\\temp\\monadtest.ps1",
+      "description": "",
+      "timeoutSeconds": 300,
+      "createdAt": "2026-03-28T09:48:02.956Z"
+    },
+    {
+      "id": "ebcd21e3-722f-49fd-9296-7f8347f61a2a",
+      "name": "Testing_Monad",
+      "path": "D:\\temp\\monadtest.ps1",
+      "description": "",
+      "timeoutSeconds": 300,
+      "createdAt": "2026-03-28T09:48:08.254Z"
+    },
+    {
+      "id": "3b6aa8f6-ab48-42bd-a5a7-6a65cb7c4032",
+      "name": "Testing_Monad",
+      "path": "D:\\temp\\monadtest.ps1",
+      "description": "",
+      "timeoutSeconds": 700,
+      "createdAt": "2026-03-28T09:49:43.826Z"
     }
   ],
   "schedules": [
     {
-      "id": "8b6524ef-303e-40f8-92fd-bbe44d653a29",
-      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
+      "id": "1a2b7c02-6f2d-417b-a97e-2095595a2e0e",
+      "scriptId": "92eb09ec-2043-44a1-8b18-2a761f18645c",
       "scriptName": "Testing_Monad",
       "name": "Testing_Monad",
       "cron": "*/5 * * * *",
       "enabled": true,
-      "createdAt": "2026-03-26T14:56:56.699Z"
+      "createdAt": "2026-04-06T13:43:33.776Z"
+    },
+    {
+      "id": "b7c57bb8-3b26-4439-9da6-0203915b7b6b",
+      "scriptId": "92eb09ec-2043-44a1-8b18-2a761f18645c",
+      "scriptName": "Testing_Monad",
+      "name": "Testing_Monad",
+      "cron": "*/5 * * * *",
+      "enabled": false,
+      "createdAt": "2026-04-06T13:46:30.693Z"
+    },
+    {
+      "id": "53c47fb4-856b-4d90-8852-f15e94e1f6ca",
+      "scriptId": "ebcd21e3-722f-49fd-9296-7f8347f61a2a",
+      "scriptName": "Testing_Monad",
+      "name": "Testing_Monad",
+      "cron": "*/5 * * * *",
+      "enabled": true,
+      "createdAt": "2026-04-06T13:46:36.398Z"
+    },
+    {
+      "id": "8e4f274e-eb15-4f82-873f-87e2ecaf55e2",
+      "scriptId": "bdf6c177-d773-41e4-ba7d-7e98defd9884",
+      "scriptName": "Testing_Monad",
+      "name": "Testing_Monad",
+      "cron": "*/5 * * * *",
+      "enabled": true,
+      "createdAt": "2026-04-06T13:46:41.464Z"
+    },
+    {
+      "id": "a08dc6ee-ac49-4a93-be02-127f232b9d88",
+      "scriptId": "672e5905-9dc2-4798-bdf6-af9be9e3e34b",
+      "scriptName": "Testing_Monad",
+      "name": "Testing_Monad",
+      "cron": "*/5 * * * *",
+      "enabled": true,
+      "createdAt": "2026-04-06T13:46:50.514Z"
+    },
+    {
+      "id": "cd4f7e9e-c871-4ffa-b8dc-bb6940bb432a",
+      "scriptId": "8c9f3730-8fcf-489d-8b6c-052dad89a829",
+      "scriptName": "Testing_Monad",
+      "name": "Testing_Monad",
+      "cron": "*/5 * * * *",
+      "enabled": true,
+      "createdAt": "2026-04-06T13:46:56.256Z"
+    },
+    {
+      "id": "368f16d1-938a-4fe4-875d-0ef57a64f18a",
+      "scriptId": "5eca2b71-2739-47d0-b8aa-5b0b851dcf47",
+      "scriptName": "Testing_Monad",
+      "name": "Testing_Monad",
+      "cron": "*/5 * * * *",
+      "enabled": true,
+      "createdAt": "2026-04-06T13:47:03.090Z"
+    },
+    {
+      "id": "d178c1ae-1ae0-49c7-8fb0-8066bd0f4b55",
+      "scriptId": "ebcd21e3-722f-49fd-9296-7f8347f61a2a",
+      "scriptName": "Testing_Monad",
+      "name": "Testing_Monad",
+      "cron": "*/5 * * * *",
+      "enabled": true,
+      "createdAt": "2026-04-06T13:47:08.011Z"
+    },
+    {
+      "id": "16410b9c-f591-417f-a9f9-99d1e9946b31",
+      "scriptId": "ebcd21e3-722f-49fd-9296-7f8347f61a2a",
+      "scriptName": "Testing_Monad",
+      "name": "Testing_Monad",
+      "cron": "*/5 * * * *",
+      "enabled": true,
+      "createdAt": "2026-04-06T13:47:15.947Z"
+    },
+    {
+      "id": "921cf6cd-0ade-4961-8230-266f3d09883d",
+      "scriptId": "913f4c89-bb15-4baf-ba7b-639ab102b19c",
+      "scriptName": "Testing_Monad",
+      "name": "Testing_Monad",
+      "cron": "*/5 * * * *",
+      "enabled": true,
+      "createdAt": "2026-04-06T13:47:21.564Z"
+    },
+    {
+      "id": "779fb2a7-7375-474a-aa04-b6f936bdf5fc",
+      "scriptId": "637b27e0-05d2-4daf-81ab-72f18e3b7708",
+      "scriptName": "Testing_Monad",
+      "name": "Testing_Monad",
+      "cron": "*/5 * * * *",
+      "enabled": true,
+      "createdAt": "2026-04-06T13:47:26.511Z"
+    },
+    {
+      "id": "157e05f2-0ba6-45ae-bb1d-1a1e68fbc952",
+      "scriptId": "d602aaab-9088-4418-8bcc-55706193c6ce",
+      "scriptName": "Testing_Monad",
+      "name": "Testing_Monad",
+      "cron": "*/5 * * * *",
+      "enabled": true,
+      "createdAt": "2026-04-06T13:47:31.877Z"
+    },
+    {
+      "id": "6ced9980-6452-4f06-9ced-7e6e46db2298",
+      "scriptId": "3b6aa8f6-ab48-42bd-a5a7-6a65cb7c4032",
+      "scriptName": "Testing_Monad",
+      "name": "Testing_Monad",
+      "cron": "*/5 * * * *",
+      "enabled": true,
+      "createdAt": "2026-04-06T13:47:37.791Z"
+    },
+    {
+      "id": "1edd5e80-7f8e-495e-b93a-c19b1b0bca59",
+      "scriptId": "913f4c89-bb15-4baf-ba7b-639ab102b19c",
+      "scriptName": "Testing_Monad",
+      "name": "Testing_Monad",
+      "cron": "*/5 * * * *",
+      "enabled": true,
+      "createdAt": "2026-04-06T13:47:43.999Z"
+    },
+    {
+      "id": "c54b09c5-3333-41ec-9861-c60e1cb39522",
+      "scriptId": "92eb09ec-2043-44a1-8b18-2a761f18645c",
+      "scriptName": "Testing_Monad",
+      "name": "Testing_Monad",
+      "cron": "*/5 * * * *",
+      "enabled": true,
+      "createdAt": "2026-04-06T14:08:39.202Z"
     }
   ],
-  "history": [
-    {
-      "id": "mn7lmr1kh1ml",
-      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
-      "scriptName": "Testing_Monad",
-      "triggeredBy": "8b6524ef-303e-40f8-92fd-bbe44d653a29",
-      "startTime": "2026-03-26T15:00:00.488Z",
-      "endTime": "2026-03-26T15:00:00.751Z",
-      "status": "success",
-      "output": "MONAD TEST\n",
-      "error": "",
-      "exitCode": 0
-    },
-    {
-      "id": "mn7li64b51x2",
-      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
-      "scriptName": "Testing_Monad",
-      "triggeredBy": "manual",
-      "startTime": "2026-03-26T14:56:26.747Z",
-      "endTime": "2026-03-26T14:56:27.002Z",
-      "status": "success",
-      "output": "MONAD TEST\n",
-      "error": "",
-      "exitCode": 0
-    },
-    {
-      "id": "mn7li4usa6uf",
-      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
-      "scriptName": "Testing_Monad",
-      "triggeredBy": "manual",
-      "startTime": "2026-03-26T14:56:25.108Z",
-      "endTime": "2026-03-26T14:56:25.363Z",
-      "status": "success",
-      "output": "MONAD TEST\n",
-      "error": "",
-      "exitCode": 0
-    },
-    {
-      "id": "mn7li3utfjb8",
-      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
-      "scriptName": "Testing_Monad",
-      "triggeredBy": "manual",
-      "startTime": "2026-03-26T14:56:23.813Z",
-      "endTime": "2026-03-26T14:56:24.057Z",
-      "status": "success",
-      "output": "MONAD TEST\n",
-      "error": "",
-      "exitCode": 0
-    },
-    {
-      "id": "mn7li2hwym8l",
-      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
-      "scriptName": "Testing_Monad",
-      "triggeredBy": "manual",
-      "startTime": "2026-03-26T14:56:22.052Z",
-      "endTime": "2026-03-26T14:56:22.302Z",
-      "status": "success",
-      "output": "MONAD TEST\n",
-      "error": "",
-      "exitCode": 0
-    },
-    {
-      "id": "mn7li17pnfw6",
-      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
-      "scriptName": "Testing_Monad",
-      "triggeredBy": "manual",
-      "startTime": "2026-03-26T14:56:20.389Z",
-      "endTime": "2026-03-26T14:56:20.650Z",
-      "status": "success",
-      "output": "MONAD TEST\n",
-      "error": "",
-      "exitCode": 0
-    },
-    {
-      "id": "mn7lhl4n784e",
-      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
-      "scriptName": "Testing_Monad",
-      "triggeredBy": "manual",
-      "startTime": "2026-03-26T14:55:59.543Z",
-      "endTime": "2026-03-26T14:56:00.357Z",
-      "status": "failed",
-      "output": "",
-      "error": "wriwadawte-host : The term 'wriwadawte-host' is not recognized as the name of a cmdlet, function, script file, or \r\noperable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try \r\nagain.\r\nAt D:\\temp\\monadtest.ps1:1 char:1\r\n+ wriwadawte-host \"MONAD TEST\"\r\n+ ~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : ObjectNotFound: (wriwadawte-host:String) [], CommandNotFoundException\r\n    + FullyQualifiedErrorId : CommandNotFoundException\r\n \r\n",
-      "exitCode": 0
-    },
-    {
-      "id": "mn7lhjf5c6uf",
-      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
-      "scriptName": "Testing_Monad",
-      "triggeredBy": "manual",
-      "startTime": "2026-03-26T14:55:57.329Z",
-      "endTime": "2026-03-26T14:55:58.152Z",
-      "status": "failed",
-      "output": "",
-      "error": "wriwadawte-host : The term 'wriwadawte-host' is not recognized as the name of a cmdlet, function, script file, or \r\noperable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try \r\nagain.\r\nAt D:\\temp\\monadtest.ps1:1 char:1\r\n+ wriwadawte-host \"MONAD TEST\"\r\n+ ~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : ObjectNotFound: (wriwadawte-host:String) [], CommandNotFoundException\r\n    + FullyQualifiedErrorId : CommandNotFoundException\r\n \r\n",
-      "exitCode": 0
-    },
-    {
-      "id": "mn7lhhzs5oqr",
-      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
-      "scriptName": "Testing_Monad",
-      "triggeredBy": "manual",
-      "startTime": "2026-03-26T14:55:55.480Z",
-      "endTime": "2026-03-26T14:55:56.321Z",
-      "status": "failed",
-      "output": "",
-      "error": "wriwadawte-host : The term 'wriwadawte-host' is not recognized as the name of a cmdlet, function, script file, or \r\noperable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try \r\nagain.\r\nAt D:\\temp\\monadtest.ps1:1 char:1\r\n+ wriwadawte-host \"MONAD TEST\"\r\n+ ~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : ObjectNotFound: (wriwadawte-host:String) [], CommandNotFoundException\r\n    + FullyQualifiedErrorId : CommandNotFoundException\r\n \r\n",
-      "exitCode": 0
-    },
-    {
-      "id": "mn7lhh6qgehz",
-      "scriptId": "e8c23d05-afc4-4977-8070-fdf9a7143882",
-      "scriptName": "Testing_Monad",
-      "triggeredBy": "manual",
-      "startTime": "2026-03-26T14:55:54.434Z",
-      "endTime": "2026-03-26T14:55:55.268Z",
-      "status": "failed",
-      "output": "",
-      "error": "wriwadawte-host : The term 'wriwadawte-host' is not recognized as the name of a cmdlet, function, script file, or \r\noperable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try \r\nagain.\r\nAt D:\\temp\\monadtest.ps1:1 char:1\r\n+ wriwadawte-host \"MONAD TEST\"\r\n+ ~~~~~~~~~~~~~~~\r\n    + CategoryInfo          : ObjectNotFound: (wriwadawte-host:String) [], CommandNotFoundException\r\n    + FullyQualifiedErrorId : CommandNotFoundException\r\n \r\n",
-      "exitCode": 0
-    }
-  ]
+  "history": []
 }

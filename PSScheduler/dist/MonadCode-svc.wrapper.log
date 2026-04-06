@@ -10,3 +10,29 @@
 2026-03-26 16:00:30 - Send SIGINT 78836
 2026-03-26 16:00:30 - SIGINT to 78836 failed - Killing as fallback
 2026-03-26 16:00:30 - Finished MonadCode
+2026-03-26 16:02:31 - Starting D:\CLAUDE_CODE\PSScheduler\dist\monadcode.exe  run
+2026-03-26 16:02:31 - Started 47216
+2026-04-06 16:26:05 - Stopping MonadCode
+2026-04-06 16:26:05 - ProcessKill 47216
+2026-04-06 16:26:05 - Found child process: 47720 Name: conhost.exe
+2026-04-06 16:26:06 - Stopping process 47720
+2026-04-06 16:26:06 - Send SIGINT 47720
+2026-04-06 16:26:06 - SIGINT to 47720 failed - Killing as fallback
+2026-04-06 16:26:06 - Stopping process 47216
+2026-04-06 16:26:06 - Send SIGINT 47216
+2026-04-06 16:26:06 - SIGINT to 47216 failed - Killing as fallback
+2026-04-06 16:26:06 - Finished MonadCode
+2026-04-06 16:26:12 - Starting D:\CLAUDE_CODE\PSScheduler\dist\monadcode.exe  run
+2026-04-06 16:26:12 - Started 41620
+2026-04-06 16:26:59 - Stopping MonadCode
+2026-04-06 16:26:59 - ProcessKill 41620
+2026-04-06 16:26:59 - Found child process: 67444 Name: conhost.exe
+2026-04-06 16:26:59 - Stopping process 67444
+2026-04-06 16:26:59 - Send SIGINT 67444
+2026-04-06 16:26:59 - SIGINT to 67444 failed - Killing as fallback
+2026-04-06 16:26:59 - Stopping process 41620
+2026-04-06 16:26:59 - Send SIGINT 41620
+2026-04-06 16:26:59 - SIGINT to 41620 failed - Killing as fallback
+2026-04-06 16:26:59 - Finished MonadCode
+2026-04-06 16:27:43 - Starting D:\CLAUDE_CODE\PSScheduler\dist\monadcode.exe  run
+2026-04-06 16:27:43 - Started 8812
