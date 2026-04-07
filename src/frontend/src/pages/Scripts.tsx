@@ -6,6 +6,7 @@ import type { Script } from '../types';
 const btnBase = 'cursor-pointer ml-auto sm:ml-2 px-2.5 py-1 text-[11px] rounded bg-stone-900 border border-stone-800 text-stone-100 tracking-wider hover:bg-stone-800 hover:text-stone-100 transition-colors disabled:opacity-40';
 const btnPrimary = 'inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary border border-primary text-black text-sm font-medium cursor-pointer transition-all hover:bg-primary-hover hover:border-primary-hover disabled:opacity-50 disabled:cursor-not-allowed';
 const btnDanger = 'cursor-pointer ml-auto sm:ml-2 px-2.5 py-1 text-[11px] rounded bg-red-900 border border-stone-800 hover:border-red-400 text-stone-100 tracking-wider hover:bg-red-800 hover:text-stone-100 transition-colors disabled:opacity-40';
+const inputClass = 'w-full px-3 py-2 rounded-md border border-border bg-bg text-text text-sm font-sans outline-none transition-colors focus:border-primary';
 
 export function Scripts() {
   const [scripts, setScripts] = useState<Script[]>([]);
@@ -184,8 +185,6 @@ function ScriptForm({
   error: string;
   initial?: Script;
 }) {
-  const inputClass = 'w-full px-3 py-2 rounded-md bg-stone-900 border border-stone-800 text-text text-sm outline-none transition-colors focus:border-stone-400';
-
   return (
     <form onSubmit={onSubmit}>
       <div className="mb-4">
