@@ -4,6 +4,7 @@ import { Modal } from '../components/Modal';
 import type { Script } from '../types';
 
 const btnBase = 'cursor-pointer ml-auto sm:ml-2 px-2.5 py-1 text-[11px] rounded bg-stone-900 border border-stone-800 text-stone-100 tracking-wider hover:bg-stone-800 hover:text-stone-100 transition-colors disabled:opacity-40';
+const btnPrimary = 'inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary border border-primary text-black text-sm font-medium cursor-pointer transition-all hover:bg-primary-hover hover:border-primary-hover disabled:opacity-50 disabled:cursor-not-allowed';
 const btnDanger = 'cursor-pointer ml-auto sm:ml-2 px-2.5 py-1 text-[11px] rounded bg-red-900 border border-stone-800 hover:border-red-400 text-stone-100 tracking-wider hover:bg-red-800 hover:text-stone-100 transition-colors disabled:opacity-40';
 
 export function Scripts() {
@@ -106,7 +107,7 @@ export function Scripts() {
           <div className="text-center py-12 text-dim">
             <p className="mb-4">No scripts registered yet.</p>
             <button
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary border border-primary text-white text-sm font-medium cursor-pointer transition-all hover:bg-primary-hover"
+              className={btnPrimary}
               onClick={() => setShowAdd(true)}
             >
               Add your first script
