@@ -8,7 +8,8 @@
     "start": "node server.js",
     "install-service": "node service-install.js",
     "uninstall-service": "node service-uninstall.js",
-    "build:exe": "pkg . --target node18-win-x64 --output dist/monadcode.exe && node -e \"fs=require('fs');fs.copyFileSync('node_modules/node-windows/bin/winsw/winsw.exe','dist/winsw.exe');fs.copyFileSync('node_modules/node-windows/bin/winsw/winsw.exe.config','dist/winsw.exe.config')\" && echo winsw.exe copied to dist/"
+    "build:exe": "pkg . --target node18-win-x64 --output dist/monadcode.exe && node -e \"fs=require('fs');fs.copyFileSync('node_modules/node-windows/bin/winsw/winsw.exe','dist/winsw.exe');fs.copyFileSync('node_modules/node-windows/bin/winsw/winsw.exe.config','dist/winsw.exe.config')\" && echo winsw.exe copied to dist/",
+    "build:msi": "cd .. && installer\\build-msi.bat"
   },
   "pkg": {
     "assets": [

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+  <Package
+    Name="Monad Code"
+    Manufacturer="MonadCode"
+    Version="1.0.0"
+    UpgradeCode="28DDDB00-5F30-4944-893A-A2526C2B0D7A"
+    InstallerVersion="500"
+    Scope="perMachine">
+
+    <MajorUpgrade
+      DowngradeErrorMessage="A newer version of Monad Code is already installed." />
+
+    <Media Id="1" Cabinet="monadcode.cab" EmbedCab="yes" />
+
+    <!-- Directory layout -->
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="MonadCode">
+        <Directory Id="DATAFOLDER" Name="data" />
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="MonadCodeMenuFolder" Name="Monad Code" />
+    </StandardDirectory>
+
+    <!-- Application files -->
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+
+      <Component Id="MainExe" Guid="26B647A7-47E3-4AE6-8BD1-AD87D384BD6C">
+        <File Id="MonadCodeExe"
+              Source="..\src\dist\monadcode.exe"
+              KeyPath="yes" />
+      </Component>
+
+      <Component Id="SvcExe" Guid="D8708E36-E06F-4FE7-9243-F94521749F57">
+        <File Id="MonadCodeSvcExe"
+              Source="..\src\dist\winsw.exe"
+              Name="MonadCode-svc.exe"
+              KeyPath="yes" />
+      </Component>
+
+      <Component Id="SvcExeConfig" Guid="F2AE2441-F595-446A-9B5B-42B082C8A6A1">
+        <File Id="MonadCodeSvcExeConfig"
+              Source="..\src\dist\winsw.exe.config"
+              Name="MonadCode-svc.exe.config"
+              KeyPath="yes" />
+      </Component>
+
+      <Component Id="SvcXml" Guid="92B46CB7-E741-400E-93BD-F627967AEDAF">
+        <File Id="MonadCodeSvcXml"
+              Source="MonadCode-svc.xml"
+              KeyPath="yes" />
+      </Component>
+
+    </ComponentGroup>
+
+    <!-- Data folder (preserved on uninstall) -->
+    <Component Id="DataFolder" Directory="DATAFOLDER"
+               Guid="92764727-DC83-4EF9-85E2-BAC09EF0964B"
+               Permanent="yes">
+      <CreateFolder />
+    </Component>
+
+    <!-- Start Menu shortcut -->
+    <Component Id="StartMenuShortcut" Directory="MonadCodeMenuFolder"
+               Guid="75B42C11-6DA0-4EA7-8C51-4CC85664EFF5">
+      <Shortcut Id="MonadCodeShortcut"
+                Name="Monad Code"
+                Description="Open Monad Code Web UI"
+                Target="[System64Folder]cmd.exe"
+                Arguments='/c start http://127.0.0.1:5088' />
+      <RemoveFolder Id="RemoveMenuFolder" On="uninstall" />
+      <RegistryValue Root="HKCU"
+                     Key="Software\MonadCode"
+                     Name="installed"
+                     Type="integer"
+                     Value="1"
+                     KeyPath="yes" />
+    </Component>
+
+    <!-- Service lifecycle custom actions (deferred + elevated) -->
+    <CustomAction Id="InstallService"
+                  Directory="INSTALLFOLDER"
+                  ExeCommand="[INSTALLFOLDER]MonadCode-svc.exe install"
+                  Execute="deferred"
+                  Impersonate="no"
+                  Return="check" />
+
+    <CustomAction Id="StartService"
+                  Directory="INSTALLFOLDER"
+                  ExeCommand="[INSTALLFOLDER]MonadCode-svc.exe start"
+                  Execute="deferred"
+                  Impersonate="no"
+                  Return="ignore" />
+
+    <CustomAction Id="StopService"
+                  Directory="INSTALLFOLDER"
+                  ExeCommand="[INSTALLFOLDER]MonadCode-svc.exe stop"
+                  Execute="deferred"
+                  Impersonate="no"
+                  Return="ignore" />
+
+    <CustomAction Id="UninstallService"
+                  Directory="INSTALLFOLDER"
+                  ExeCommand="[INSTALLFOLDER]MonadCode-svc.exe uninstall"
+                  Execute="deferred"
+                  Impersonate="no"
+                  Return="ignore" />
+
+    <InstallExecuteSequence>
+      <!-- Install: register then start (after files land on disk) -->
+      <Custom Action="InstallService" After="InstallFiles"
+              Condition="NOT Installed AND NOT REMOVE" />
+      <Custom Action="StartService" After="InstallService"
+              Condition="NOT Installed AND NOT REMOVE" />
+
+      <!-- Uninstall: stop then unregister (before files are removed) -->
+      <Custom Action="StopService" Before="RemoveFiles"
+              Condition='REMOVE="ALL"' />
+      <Custom Action="UninstallService" After="StopService"
+              Condition='REMOVE="ALL"' />
+    </InstallExecuteSequence>
+
+    <!-- Feature -->
+    <Feature Id="ProductFeature" Title="Monad Code" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentRef Id="DataFolder" />
+      <ComponentRef Id="StartMenuShortcut" />
+    </Feature>
+
+  </Package>
+
+</Wix>
