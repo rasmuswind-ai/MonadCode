@@ -14,12 +14,34 @@ export function Schedules() {
   const [scripts, setScripts] = useState<Script[]>([]);
   const [showAdd, setShowAdd] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
-  const load = () => {
-    api.getSchedules().then(setSchedules);
-    api.getScripts().then(setScripts);
+  const load = async () => {
+    await Promise.all([
+      api.getSchedules().then(setSchedules),
+      api.getScripts().then(setScripts),
+    ]);
   };
-  useEffect(load, []);
+  useEffect(() => {
+    let mounted = true;
+    const start = Date.now();
+
+    (async () => {
+      try {
+        await load();
+      } finally {
+        const elapsed = Date.now() - start;
+        const remaining = Math.max(0, 500 - elapsed);
+        window.setTimeout(() => {
+          if (mounted) setIsLoading(false);
+        }, remaining);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -81,7 +103,7 @@ export function Schedules() {
               onClick={() => setShowAdd(true)}
               className="cursor-pointer ml-auto sm:ml-2 px-2.5 py-1 text-[11px] rounded bg-stone-900 border border-stone-800 text-stone-400 tracking-wider hover:bg-stone-800 hover:text-stone-300 transition-colors disabled:opacity-40"
             >
-              + Add Script
+              + Create Schedule
             </button>
           </div>
         </div>
@@ -89,15 +111,21 @@ export function Schedules() {
         <div className="mt-4 border-t border-white/10" />
 
         <div className="mt-6 border border-stone-800 rounded-lg backdrop-blur-md bg-stone-900/30 overflow-y-auto custom-scrollbar">
-          {scripts.length === 0 && (
-            <div className="text-center py-12 text-dim">Add a script first before creating schedules.</div>
-          )}
-
           <div className="bg-surface rounded-[10px] overflow-hidden">
-            {schedules.length === 0 && scripts.length > 0 ? (
+            {isLoading ? (
+              <div className="text-center py-12 text-dim">Loading...</div>
+            ) : schedules.length === 0 ? (
               <div className="text-center py-12 text-dim">
-                <p className="mb-4">No schedules yet.</p>
-                <button className={btnPrimary} onClick={() => setShowAdd(true)}>Create your first schedule</button>
+                {scripts.length === 0 ? (
+                  <p>Add a script first before creating schedules.</p>
+                ) : (
+                  <>
+                    <p className="mb-4">No schedules yet.</p>
+                    <button className={btnPrimary} onClick={() => setShowAdd(true)}>
+                      Create your first schedule
+                    </button>
+                  </>
+                )}
               </div>
             ) : (
               <table className="w-full border-collapse">
