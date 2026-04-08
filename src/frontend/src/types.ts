@@ -59,4 +59,15 @@ export interface BrowseResult {
   quickAccess: BrowseEntry[];
 }
 
+export interface Settings {
+  scriptsFolder?: string;
+}
+
+export interface TreeEntry {
+  name: string;
+  path: string;
+  type: 'directory';
+  children?: TreeEntry[];
+}
+
 export type Page = 'dashboard' | 'scripts' | 'schedules' | 'history' | 'fat_fingers';

@@ -20,7 +20,11 @@ body {
   @apply bg-bg text-text font-sans min-h-screen;
 }
 
-/* Toggle switch - too complex for pure utility classes */
+select option {
+  background: #1c1c1c;
+  color: #d6d3d1;
+}
+
 .toggle {
   @apply relative inline-block w-10 h-[22px];
 }

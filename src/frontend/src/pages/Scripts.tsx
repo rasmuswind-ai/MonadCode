@@ -1,18 +1,22 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api';
 import { Modal } from '../components/Modal';
-import { FileBrowser } from '../components/FileBrowser';
-import type { Script } from '../types';
+import { FolderTree } from '../components/FolderTree';
+import type { Script, TreeEntry } from '../types';
+import {
+  FileCode,
+  Plus,
+  Trash2,
+  Pencil,
+  Play,
+  Eye,
+  FolderOpen,
+  Clock,
+  RefreshCw,
+  FolderSearch,
+} from 'lucide-react';
 
-function dirname(p: string): string {
-  const i = Math.max(p.lastIndexOf('\\'), p.lastIndexOf('/'));
-  return i > 0 ? p.substring(0, i) : '';
-}
-
-const btnBase = 'cursor-pointer ml-auto sm:ml-2 px-2.5 py-1 text-[11px] rounded bg-stone-900 border border-stone-800 text-stone-100 tracking-wider hover:bg-stone-800 hover:text-stone-100 transition-colors disabled:opacity-40';
-const btnPrimary = 'inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary border border-primary text-black text-sm font-medium cursor-pointer transition-all hover:bg-primary-hover hover:border-primary-hover disabled:opacity-50 disabled:cursor-not-allowed';
-const btnDanger = 'cursor-pointer ml-auto sm:ml-2 px-2.5 py-1 text-[11px] rounded bg-red-900 border border-stone-800 hover:border-red-400 text-stone-100 tracking-wider hover:bg-red-800 hover:text-stone-100 transition-colors disabled:opacity-40';
-const inputClass = 'w-full px-3 py-2 rounded-md border border-border bg-bg text-text text-sm font-sans outline-none transition-colors focus:border-primary';
+const inputClass = 'cursor-text w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-stone-300 placeholder-stone-600 focus:outline-none focus:border-stone-500/50 transition-colors font-mono';
 
 export function Scripts() {
   const [scripts, setScripts] = useState<Script[]>([]);
@@ -21,8 +25,49 @@ export function Scripts() {
   const [viewContent, setViewContent] = useState<{ name: string; content: string } | null>(null);
   const [error, setError] = useState('');
 
+  // Folder tree state
+  const [scriptsFolder, setScriptsFolder] = useState<string | null>(null);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
+  const [folderTree, setFolderTree] = useState<TreeEntry[]>([]);
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
+  const [showFolderPicker, setShowFolderPicker] = useState(false);
+  const [treeLoading, setTreeLoading] = useState(false);
+
   const load = () => { api.getScripts().then(setScripts); };
-  useEffect(load, []);
+
+  useEffect(() => {
+    load();
+    api.getSettings().then((settings) => {
+      if (settings.scriptsFolder) {
+        setScriptsFolder(settings.scriptsFolder);
+        loadTree(settings.scriptsFolder);
+      }
+      setSettingsLoaded(true);
+    });
+  }, []);
+
+  const loadTree = async (folder: string) => {
+    setTreeLoading(true);
+    try {
+      const tree = await api.browseTree(folder);
+      setFolderTree(tree);
+    } catch {
+      setFolderTree([]);
+    }
+    setTreeLoading(false);
+  };
+
+  const handlePickFolder = async (folderPath: string) => {
+    setShowFolderPicker(false);
+    setScriptsFolder(folderPath);
+    setSelectedFolder(null);
+    await api.updateSettings({ scriptsFolder: folderPath });
+    loadTree(folderPath);
+  };
+
+  const handleChangeFolder = () => {
+    setShowFolderPicker(true);
+  };
 
   const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -81,176 +126,481 @@ export function Scripts() {
     }
   };
 
+  // Filter scripts based on selected folder
+  const filteredScripts = selectedFolder
+    ? scripts.filter((s) => {
+        const normalizedPath = s.path.replace(/\//g, '\\');
+        const normalizedFolder = selectedFolder.replace(/\//g, '\\');
+        return normalizedPath.startsWith(normalizedFolder + '\\');
+      })
+    : scripts;
+
+  // Show loading while settings are being fetched
+  if (!settingsLoaded) {
+    return (
+      <div className="lg:h-screen relative flex flex-col lg:overflow-hidden overflow-y-auto p-4">
+        <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 -z-10">
+          <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-orange-800 opacity-25 rounded-full blur-[175px] -translate-x-1/3 -translate-y-1/3" />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-orange-800 opacity-15 rounded-full blur-[200px] translate-y-1/3" />
+        </div>
+        <div className="relative flex-1 flex items-center justify-center bg-black/70 border border-white/10 rounded-2xl p-6 shadow-2xl">
+          <div className="flex flex-col items-center gap-2">
+            <FileCode className="w-5 h-5 text-stone-700 animate-pulse" />
+            <p className="text-stone-600 text-xs">Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // State A: No scripts folder set — show folder picker prompt
+  if (!scriptsFolder) {
+    return (
+      <div className="lg:h-screen relative flex flex-col lg:overflow-hidden overflow-y-auto p-4">
+        <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 -z-10">
+          <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-orange-800 opacity-25 rounded-full blur-[175px] -translate-x-1/3 -translate-y-1/3" />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-orange-800 opacity-15 rounded-full blur-[200px] translate-y-1/3" />
+        </div>
+        <div className="relative flex-1 flex flex-col bg-black/70 border border-white/10 rounded-2xl p-6 shadow-2xl min-h-0 overflow-y-auto custom-scrollbar">
+          <div className="shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="border border-white/10 ml-2 mr-2 py-4" />
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-stone-600 via-stone-400 to-stone-600 bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
+                Scripts
+              </h2>
+            </div>
+          </div>
+
+          {!showFolderPicker ? (
+            <div className="flex-1 flex items-center justify-center">
+              <div className="flex flex-col items-center gap-4">
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
+                  <FolderSearch className="w-8 h-8 text-stone-600" />
+                </div>
+                <div className="text-center">
+                  <p className="text-stone-300 text-sm font-semibold">Choose a scripts folder</p>
+                  <p className="text-stone-600 text-xs mt-1 max-w-[300px]">
+                    Select the root folder where your PowerShell scripts are located. The folder structure will appear as a navigation tree.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowFolderPicker(true)}
+                  className="cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg border border-white/10 text-stone-400 hover:text-stone-300 hover:border-white/20 hover:bg-white/5 transition-all duration-200 text-xs"
+                >
+                  <FolderOpen className="w-4 h-4" />
+                  <span>Browse for folder</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-6 flex-1">
+              <FolderPicker
+                onSelect={handlePickFolder}
+                onCancel={() => setShowFolderPicker(false)}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // State B: Scripts folder is set — show sidebar + content
   return (
-    <>
-    <div className="h-full sm:h-[100dvh] sm:flex-1 sm:min-h-0 relative overflow-hidden flex flex-col p-4 pb-4">
-      <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 -z-10">
-        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-orange-800 opacity-25 rounded-full blur-[175px] -translate-x-1/3 -translate-y-1/3" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-orange-800 opacity-15 rounded-full blur-[200px] translate-y-1/3" />
+    <div className="lg:h-screen relative flex flex-col lg:overflow-hidden overflow-y-auto p-4">
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900">
+        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-white/50 opacity-25 rounded-full blur-[175px] -translate-x-1/3 -translate-y-1/3" />
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-pink-500 opacity-15 rounded-full blur-[200px] translate-y-1/3" />
       </div>
 
-      <div className="relative flex-1 flex flex-col bg-black/50 border border-white/10 rounded-2xl p-4 sm:p-6 shadow-2xl min-h-0 mb-4">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-          <div className="flex items-center gap-2 mr-auto">
-            <h2 className="ml-2 sm:ml-4 text-xl sm:text-2xl font-bold bg-gradient-to-r from-stone-600 via-stone-400 to-stone-600 bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
-              SCRIPTS
-            </h2>
+      <div className="relative flex-1 flex bg-black/70 border border-white/10 rounded-2xl shadow-2xl min-h-0 overflow-hidden">
+        {/* Left sidebar — folder tree */}
+        <div className="w-[220px] shrink-0 border-r border-white/10 flex flex-col">
+          <div className="px-3 py-3 border-b border-white/10 shrink-0">
+            <div className="flex items-center justify-between">
+              <p className="text-stone-500 text-[11px] uppercase tracking-wider font-medium">Explorer</p>
+              <button
+                onClick={() => loadTree(scriptsFolder)}
+                className="cursor-pointer p-1 rounded text-stone-600 hover:text-stone-400 transition-colors"
+                title="Refresh tree"
+              >
+                <RefreshCw className="w-3 h-3" />
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-3 text-[11px] text-stone-400 ml-2 sm:ml-0">
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
+            {treeLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <p className="text-stone-600 text-xs">Scanning...</p>
+              </div>
+            ) : (
+              <FolderTree
+                tree={folderTree}
+                selectedPath={selectedFolder}
+                rootPath={scriptsFolder}
+                onSelect={setSelectedFolder}
+              />
+            )}
+          </div>
+          <div className="px-3 py-2 border-t border-white/10 shrink-0">
             <button
-              onClick={() => setShowAdd(true)}
-              className="cursor-pointer ml-auto sm:ml-2 px-2.5 py-1 text-[11px] rounded bg-stone-900 border border-stone-800 text-stone-400 tracking-wider hover:bg-stone-800 hover:text-stone-300 transition-colors disabled:opacity-40"
+              onClick={handleChangeFolder}
+              className="cursor-pointer w-full flex items-center justify-center gap-1.5 px-2 py-1 rounded-lg border border-white/10 text-stone-600 hover:text-stone-400 hover:border-white/20 hover:bg-white/5 transition-all duration-200 text-[11px]"
             >
-              + Add Script
+              <FolderOpen className="w-3 h-3" />
+              <span>Change folder</span>
             </button>
           </div>
         </div>
 
-        <div className="mt-4 border-t border-white/10" />
-
-        <div className="mt-6 border border-stone-800 rounded-lg backdrop-blur-md bg-stone-900/30 overflow-y-auto custom-scrollbar">
-        {scripts.length === 0 ? (
-
-          <div className="text-center py-12 text-dim">
-            <p className="mb-4">No scripts registered yet.</p>
-            <button
-              className={btnPrimary}
-              onClick={() => setShowAdd(true)}
-            >
-              Add your first script
-            </button>
+        {/* Right content — script list */}
+        <div className="flex-1 flex flex-col p-6 min-w-0 overflow-y-auto custom-scrollbar">
+          <div className="shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="border border-white/10 ml-2 mr-2 py-4" />
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-stone-600 via-stone-400 to-stone-600 bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
+                  Scripts
+                </h2>
+              </div>
+              <button
+                onClick={() => setShowAdd(true)}
+                className="cursor-pointer flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/20 text-stone-400 hover:text-stone-300 hover:border-white/20 hover:bg-white/5 transition-all duration-200 text-xs"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Script</span>
+              </button>
+            </div>
           </div>
-        ) : (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                {['Name', 'Path', 'Timeout', 'Actions'].map(h => (
-                    <th key={h} className="text-left px-4 py-3 uppercase text-[11px] tracking-wide transition-colors bg-stone-400 text-stone-700">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {scripts.map(s => (
-                <tr key={s.id} className="hover:bg-primary/[0.04]">
-                  <td className="px-4 py-3 text-sm border-b border-border">
-                    <strong>{s.name}</strong>
-                    {s.description && <div className="text-dim text-xs mt-0.5">{s.description}</div>}
-                  </td>
-                  <td className="px-4 py-3 text-sm border-b border-border font-mono text-xs text-dim">{s.path}</td>
-                  <td className="px-4 py-3 text-sm border-b border-border text-dim">{s.timeoutSeconds}s</td>
-                  <td className="px-4 py-3 text-sm border-b border-border">
-                    <div className="flex gap-1.5">
-                      <button className={btnBase} onClick={() => handleRun(s.id)}>Run</button>
-                      <button className={btnBase} onClick={() => handleView(s)}>View</button>
-                      <button className={btnBase} onClick={() => { setError(''); setEditScript(s); }}>Edit</button>
-                      <button className={btnDanger} onClick={() => handleDelete(s.id, s.name)}>Del</button>
+
+          <div className="mt-6 flex flex-col lg:flex-row gap-4 shrink-0">
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-2 shadow-2xl shrink-0">
+              <div className="flex items-center gap-3 whitespace-nowrap">
+                <FileCode className="w-4 h-4 ml-2 text-stone-600" />
+                <p className="text-stone-400 text-sm">
+                  {selectedFolder ? 'Scripts in folder:' : 'Total scripts:'}
+                </p>
+                <p className="mr-2 text-md font-bold text-gray-300">{filteredScripts.length}</p>
+              </div>
+            </div>
+            {selectedFolder && (
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-2 shadow-2xl shrink-0">
+                <div className="flex items-center gap-3 whitespace-nowrap">
+                  <FolderOpen className="w-4 h-4 ml-2 text-stone-600" />
+                  <p className="mr-2 text-stone-400 text-sm truncate max-w-[300px]">
+                    {selectedFolder.split(/[/\\]/).pop()}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-6 flex-1 min-h-0">
+            <div className="bg-white/5 border border-white/10 backdrop-blur rounded-lg overflow-y-auto custom-scrollbar h-full">
+              <div className="shrink-0">
+                <div className="ml-3 w-fit">
+                  <h2 className="text-stone-500 mt-3 ml-3">
+                    {selectedFolder ? selectedFolder.split(/[/\\]/).pop() : 'All Scripts'}
+                  </h2>
+                  <div className="ml-2 mt-2 border border-white/10 px-1 rounded-lg" />
+                </div>
+              </div>
+
+              {filteredScripts.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 gap-2">
+                  <FileCode className="w-5 h-5 text-stone-700" />
+                  <p className="text-stone-600 text-xs">
+                    {selectedFolder ? 'No scripts in this folder.' : 'No scripts registered yet.'}
+                  </p>
+                  <button
+                    onClick={() => setShowAdd(true)}
+                    className="cursor-pointer mt-2 flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 text-stone-500 bg-white/5 hover:text-stone-300 hover:border-white/20 hover:bg-white/5 transition-all duration-200 text-xs"
+                  >
+                    <Plus className="w-3 h-3" />
+                    <span>Add a script</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="p-4">
+                  {filteredScripts.map((s) => (
+                    <div key={s.id}>
+                      <div className="flex items-center justify-between py-2">
+                        <div className="flex items-center gap-3">
+                          <FileCode className="w-4 h-4 text-stone-600 shrink-0" />
+                          <div>
+                            <p className="text-sm font-semibold text-stone-300">
+                              {s.name}
+                            </p>
+                            {s.description && (
+                              <p className="text-xs text-stone-500 italic">{s.description}</p>
+                            )}
+                            <p className="text-xs text-stone-600 font-mono mt-0.5">{s.path}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="border border-white/10 py-3 rounded-lg" />
+                          <div className="ml-4 mr-4 text-xs flex items-center border border-white/10 backdrop-blur rounded-lg p-1 bg-black/40">
+                            <div className="flex items-center gap-2 ml-2 mr-2">
+                              <Clock className="w-3 h-3 text-stone-600" />
+                              <span className="text-xs font-mono text-stone-400">{s.timeoutSeconds}s</span>
+                            </div>
+                          </div>
+                          <div className="border border-white/10 py-3 rounded-lg" />
+                          <button
+                            onClick={() => handleRun(s.id)}
+                            className="cursor-pointer p-2 rounded-lg border border-white/10 text-stone-500 hover:text-green-400 hover:border-green-500/30 hover:bg-green-500/10 transition-all duration-200"
+                            title="Run script"
+                          >
+                            <Play className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleView(s)}
+                            className="cursor-pointer p-2 rounded-lg border border-white/10 text-stone-500 hover:text-stone-300 hover:border-white/20 hover:bg-white/5 transition-all duration-200"
+                            title="View content"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => { setError(''); setEditScript(s); }}
+                            className="cursor-pointer p-2 rounded-lg border border-white/10 text-stone-500 hover:text-stone-300 hover:border-white/20 hover:bg-white/5 transition-all duration-200"
+                            title="Edit script"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(s.id, s.name)}
+                            className="cursor-pointer p-2 rounded-lg border border-white/10 text-red-400 hover:border-red-500/30 hover:bg-red-500/10 transition-all duration-200"
+                            title="Delete script"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="border border-white/5" />
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {showAdd && (
+            <Modal title="Add Script" onClose={() => setShowAdd(false)}>
+              <ScriptForm onSubmit={handleAdd} error={error} currentFolder={selectedFolder || scriptsFolder || ''} />
+            </Modal>
+          )}
+
+          {editScript && (
+            <Modal title="Edit Script" onClose={() => setEditScript(null)}>
+              <ScriptForm onSubmit={handleEdit} error={error} initial={editScript} currentFolder={selectedFolder || scriptsFolder || ''} />
+            </Modal>
+          )}
+
+          {viewContent && (
+            <Modal title={viewContent.name} onClose={() => setViewContent(null)}>
+              <pre className="bg-white/5 border border-white/10 rounded-lg p-3 font-mono text-xs whitespace-pre-wrap break-all max-h-[400px] overflow-y-auto text-stone-400 custom-scrollbar">
+                {viewContent.content}
+              </pre>
+            </Modal>
+          )}
+
+          {showFolderPicker && (
+            <Modal title="Change Scripts Folder" onClose={() => setShowFolderPicker(false)}>
+              <FolderPicker
+                onSelect={handlePickFolder}
+                onCancel={() => setShowFolderPicker(false)}
+                initialPath={scriptsFolder}
+              />
+            </Modal>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Folder Picker (reuses browse API but only selects directories) ──
+
+function FolderPicker({
+  onSelect,
+  onCancel,
+  initialPath,
+}: {
+  onSelect: (folderPath: string) => void;
+  onCancel: () => void;
+  initialPath?: string;
+}) {
+  const [currentPath, setCurrentPath] = useState(initialPath || '');
+  const [parent, setParent] = useState<string | null>(null);
+  const [directories, setDirectories] = useState<{ name: string; path: string }[]>([]);
+  const [quickAccess, setQuickAccess] = useState<{ name: string; path: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError('');
+
+    api.browse(currentPath || undefined).then((result) => {
+      if (cancelled) return;
+      setCurrentPath(result.current);
+      setParent(result.parent);
+      setDirectories(result.directories);
+      setQuickAccess(result.quickAccess);
+      setLoading(false);
+    }).catch((err) => {
+      if (cancelled) return;
+      setError(err.message);
+      setLoading(false);
+    });
+
+    return () => { cancelled = true; };
+  }, [currentPath]);
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        {quickAccess.map((qa) => (
+          <button
+            key={qa.path}
+            type="button"
+            onClick={() => setCurrentPath(qa.path)}
+            className="cursor-pointer px-2.5 py-1 text-[11px] rounded-lg border border-white/10 text-stone-400 hover:text-stone-300 hover:border-white/20 hover:bg-white/5 transition-all duration-200 flex items-center gap-1.5"
+          >
+            <FolderOpen className="w-3 h-3" />
+            {qa.name}
+          </button>
+        ))}
+      </div>
+
+      <div className="px-3 py-2 rounded-lg border border-white/10 bg-white/5 font-mono text-xs text-stone-400 break-all mb-3">
+        {currentPath || '...'}
+      </div>
+
+      {error && <div className="text-red-400 text-xs mb-3">{error}</div>}
+
+      <div className="border border-white/10 rounded-lg bg-white/5 max-h-[350px] overflow-y-auto custom-scrollbar">
+        {loading ? (
+          <div className="text-center py-8 text-stone-600 text-xs">Loading...</div>
+        ) : (
+          <div>
+            {parent && (
+              <button
+                type="button"
+                className="cursor-pointer flex items-center gap-2.5 w-full px-3 py-2.5 text-xs text-stone-400 hover:bg-white/5 transition-colors border-b border-white/5 font-mono"
+                onClick={() => setCurrentPath(parent)}
+              >
+                <FolderOpen className="w-3.5 h-3.5 text-stone-500" />
+                <span>..</span>
+              </button>
+            )}
+
+            {directories.map((dir) => (
+              <button
+                key={dir.path}
+                type="button"
+                className="cursor-pointer flex items-center gap-2.5 w-full px-3 py-2.5 text-xs text-stone-300 hover:bg-white/5 transition-colors border-b border-white/5 font-mono"
+                onClick={() => setCurrentPath(dir.path)}
+              >
+                <FolderOpen className="w-3.5 h-3.5 text-stone-500 shrink-0" />
+                <span className="truncate">{dir.name}</span>
+              </button>
+            ))}
+
+            {directories.length === 0 && !parent && (
+              <div className="text-center py-8 text-stone-600 text-xs">
+                No subfolders found.
+              </div>
+            )}
+          </div>
         )}
       </div>
 
-
-      {showAdd && (
-        <Modal title="Add Script" onClose={() => setShowAdd(false)}>
-          <ScriptForm onSubmit={handleAdd} error={error} />
-        </Modal>
-      )}
-
-      {editScript && (
-        <Modal title="Edit Script" onClose={() => setEditScript(null)}>
-          <ScriptForm onSubmit={handleEdit} error={error} initial={editScript} />
-        </Modal>
-      )}
-
-      {viewContent && (
-        <Modal title={viewContent.name} onClose={() => setViewContent(null)}>
-          <pre className="bg-bg border border-border rounded-md p-3 font-mono text-xs whitespace-pre-wrap break-all max-h-[400px] overflow-y-auto text-dim">
-            {viewContent.content}
-          </pre>
-        </Modal>
-      )}
-        </div>
+      <div className="mt-4 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="cursor-pointer px-3 py-1.5 rounded-lg border border-white/10 text-stone-500 hover:text-stone-300 hover:border-white/20 hover:bg-white/5 transition-all duration-200 text-xs"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          onClick={() => onSelect(currentPath)}
+          className="cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg border border-green-800 text-stone-300 text-xs font-medium transition-all duration-200 hover:bg-green-600 hover:border-white/20 hover:text-stone-200"
+        >
+          <FolderOpen className="w-3.5 h-3.5" />
+          Select this folder
+        </button>
       </div>
-
-    
-
-    </>
+    </div>
   );
 }
+
+// ── Script Form (add/edit) ──
 
 function ScriptForm({
   onSubmit,
   error,
   initial,
+  currentFolder,
 }: {
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   error: string;
   initial?: Script;
+  currentFolder: string;
 }) {
-  const [pathValue, setPathValue] = useState(initial?.path ?? '');
-  const [showBrowser, setShowBrowser] = useState(false);
+  const initialFilename = initial?.path ? initial.path.split(/[/\\]/).pop() || '' : '';
+  const [filename, setFilename] = useState(initialFilename);
+
+  // For editing, keep the full original path; for adding, build from folder + filename
+  const fullPath = initial
+    ? (filename === initialFilename ? initial.path : (currentFolder ? currentFolder + '\\' + filename : filename))
+    : (currentFolder ? currentFolder + '\\' + filename : filename);
 
   return (
-    <>
-      <form onSubmit={onSubmit}>
-        <div className="mb-4">
-          <label className="block text-xs font-semibold text-dim mb-1">Name</label>
-          <input name="name" required defaultValue={initial?.name} placeholder="Cleanup Temp Files" className={inputClass} />
-        </div>
-        <div className="mb-4">
-          <label className="block text-xs font-semibold text-dim mb-1">Script Path</label>
-          <div className="flex gap-2">
-            <input
-              name="path"
-              required
-              value={pathValue}
-              onChange={(e) => setPathValue(e.target.value)}
-              placeholder="C:\Scripts\cleanup.ps1"
-              className={inputClass}
-            />
-            <button
-              type="button"
-              onClick={() => setShowBrowser(true)}
-              className="cursor-pointer shrink-0 px-2.5 py-1 text-[11px] rounded bg-stone-900 border border-stone-800 text-stone-400 tracking-wider hover:bg-stone-800 hover:text-stone-300 transition-colors"
-            >
-              Browse
-            </button>
+    <form onSubmit={onSubmit}>
+      <div className="mb-4">
+        <label className="block text-xs font-semibold text-stone-500 mb-1">Name</label>
+        <input name="name" required defaultValue={initial?.name} placeholder="Cleanup Temp Files" className={inputClass} />
+      </div>
+      <div className="mb-4">
+        <label className="block text-xs font-semibold text-stone-500 mb-1">Script File</label>
+        {currentFolder && (
+          <div className="flex items-center gap-2 mb-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
+            <FolderOpen className="w-3 h-3 text-stone-600 shrink-0" />
+            <span className="text-[11px] font-mono text-stone-500 truncate">{currentFolder}</span>
           </div>
-          <div className="text-xs text-dim mt-1">Full path to a .ps1 file on this machine</div>
+        )}
+        <input
+          type="text"
+          value={filename}
+          onChange={(e) => setFilename(e.target.value)}
+          placeholder="script-name.ps1"
+          className={inputClass}
+          required
+        />
+        <input type="hidden" name="path" value={fullPath} />
+        <div className="text-xs text-stone-600 mt-1 font-mono">
+          {currentFolder ? 'Filename inside the selected folder' : 'Full path to a .ps1 file'}
         </div>
-        <div className="mb-4">
-          <label className="block text-xs font-semibold text-dim mb-1">Description</label>
-          <input name="description" defaultValue={initial?.description} placeholder="Optional description" className={inputClass} />
-        </div>
-        <div className="mb-4">
-          <label className="block text-xs font-semibold text-dim mb-1">Timeout (seconds)</label>
-          <input name="timeoutSeconds" type="number" defaultValue={initial?.timeoutSeconds ?? 300} min={1} className={inputClass} />
-        </div>
-        {error && <div className="text-danger text-sm mb-3">{error}</div>}
-        <button
-          type="submit"
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary border border-primary text-black text-sm font-medium cursor-pointer transition-all hover:bg-primary-hover hover:border-primary-hover"
-        >
-          {initial ? 'Save' : 'Add Script'}
-        </button>
-      </form>
-
-      {showBrowser && (
-        <Modal title="Browse for Script" onClose={() => setShowBrowser(false)}>
-          <FileBrowser
-            initialPath={pathValue ? dirname(pathValue) : undefined}
-            onSelect={(filePath) => {
-              setPathValue(filePath);
-              setShowBrowser(false);
-            }}
-            onClose={() => setShowBrowser(false)}
-          />
-        </Modal>
-      )}
-    </>
+      </div>
+      <div className="mb-4">
+        <label className="block text-xs font-semibold text-stone-500 mb-1">Description</label>
+        <input name="description" defaultValue={initial?.description} placeholder="Optional description" className={inputClass} />
+      </div>
+      <div className="mb-4">
+        <label className="block text-xs font-semibold text-stone-500 mb-1">Timeout (seconds)</label>
+        <input name="timeoutSeconds" type="number" defaultValue={initial?.timeoutSeconds ?? 300} min={1} className={inputClass} />
+      </div>
+      {error && <div className="text-red-400 text-xs mb-3">{error}</div>}
+      <button
+        type="submit"
+        className="cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg border border-green-800 text-stone-300 text-xs font-medium transition-all duration-200 hover:bg-green-600 hover:border-white/20 hover:text-stone-200"
+      >
+        {initial ? 'Save' : 'Add Script'}
+      </button>
+    </form>
   );
 }

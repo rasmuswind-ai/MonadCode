@@ -8,6 +8,25 @@ const cron = require('node-cron');
 
 const router = express.Router();
 
+// ── Helpers ─────────────────────────────────────────
+
+function getQuickAccess() {
+  const items = [{ name: 'Home', path: os.homedir() }];
+  if (os.platform() === 'win32') {
+    // Detect available drive letters on Windows
+    for (let code = 65; code <= 90; code++) {
+      const drive = String.fromCharCode(code) + ':\\';
+      try {
+        fs.accessSync(drive, fs.constants.R_OK);
+        items.push({ name: drive, path: drive });
+      } catch { /* drive not available */ }
+    }
+  } else {
+    items.push({ name: '/', path: '/' });
+  }
+  return items;
+}
+
 // ── Browse filesystem ───────────────────────────────
 
 router.get('/browse', (req, res) => {
@@ -54,11 +73,69 @@ router.get('/browse', (req, res) => {
     parent: parent === dirPath ? null : parent,
     directories,
     files,
-    quickAccess: [
-      { name: 'Home', path: os.homedir() },
-      { name: 'C:\\', path: 'C:\\' },
-    ],
+    quickAccess: getQuickAccess(),
   });
+});
+
+// ── Settings ────────────────────────────────────────
+
+router.get('/settings', (req, res) => {
+  res.json(req.db.settings || {});
+});
+
+router.put('/settings', (req, res) => {
+  req.db.settings = { ...(req.db.settings || {}), ...req.body };
+  saveDb(req.db);
+  res.json(req.db.settings);
+});
+
+// ── Browse directory tree (folders only, recursive) ─
+
+router.get('/browse/tree', (req, res) => {
+  const dirPath = path.resolve(req.query.path || os.homedir());
+  const maxDepth = 5;
+
+  function scanDir(dir, depth) {
+    if (depth > maxDepth) return [];
+    let entries;
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return [];
+    }
+
+    const result = [];
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      // Skip hidden/system folders
+      if (entry.name.startsWith('.') || entry.name === 'node_modules') continue;
+      try {
+        const fullPath = path.join(dir, entry.name);
+        const children = scanDir(fullPath, depth + 1);
+        result.push({
+          name: entry.name,
+          path: fullPath,
+          type: 'directory',
+          children,
+        });
+      } catch { /* skip inaccessible */ }
+    }
+    result.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+    return result;
+  }
+
+  try {
+    const stat = fs.statSync(dirPath);
+    if (!stat.isDirectory()) {
+      return res.status(400).json({ error: 'Path is not a directory' });
+    }
+  } catch (err) {
+    if (err.code === 'ENOENT') return res.status(404).json({ error: 'Directory not found' });
+    return res.status(500).json({ error: err.message });
+  }
+
+  const tree = scanDir(dirPath, 0);
+  res.json(tree);
 });
 
 // ── Scripts ──────────────────────────────────────────

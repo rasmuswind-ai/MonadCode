@@ -4,7 +4,7 @@
   <Package
     Name="Monad Code"
     Manufacturer="MonadCode"
-    Version="1.0.6"
+    Version="1.1.0"
     UpgradeCode="28DDDB00-5F30-4944-893A-A2526C2B0D7A"
     InstallerVersion="500"
     Scope="perMachine">

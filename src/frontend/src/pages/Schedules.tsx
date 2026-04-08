@@ -1,13 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api } from '../api';
 import { Modal } from '../components/Modal';
 import type { Schedule, Script } from '../types';
+import {
+  Clock,
+  Plus,
+  Trash2,
+  Pencil,
+  Search,
+} from 'lucide-react';
 
-const tdClass = 'px-4 py-3 text-sm border-b border-border align-middle';
-const btnBase = 'cursor-pointer ml-auto sm:ml-2 px-2.5 py-1 text-[11px] rounded bg-stone-900 border border-stone-800 text-stone-100 tracking-wider hover:bg-stone-800 hover:text-stone-100 transition-colors disabled:opacity-40';
-const btnDanger = 'cursor-pointer ml-auto sm:ml-2 px-2.5 py-1 text-[11px] rounded bg-red-900 border border-stone-800 hover:border-red-400 text-stone-100 tracking-wider hover:bg-red-800 hover:text-stone-100 transition-colors disabled:opacity-40';
-const btnPrimary = 'inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary border border-primary text-black text-sm font-medium cursor-pointer transition-all hover:bg-primary-hover hover:border-primary-hover disabled:opacity-50 disabled:cursor-not-allowed';
-const inputClass = 'w-full px-3 py-2 rounded-md border border-border bg-bg text-text text-sm font-sans outline-none transition-colors focus:border-primary';
+const inputClass = 'cursor-text w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-stone-300 placeholder-stone-600 focus:outline-none focus:border-stone-500/50 transition-colors font-mono';
+const dropDownClass = 'cursor-pointer w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-stone-300 placeholder-stone-600 focus:outline-none focus:border-stone-500/50 transition-colors font-mono';
 
 type Frequency = 'every-minutes' | 'every-hours' | 'daily' | 'weekly' | 'custom';
 
@@ -76,10 +80,11 @@ function CronPicker({ value, onChange }: { value: string; onChange: (cron: strin
   return (
     <div className="space-y-3">
       <select
-        className={inputClass}
+        className={dropDownClass}
         value={preset.frequency}
         onChange={e => update({ frequency: e.target.value as Frequency })}
       >
+        
         <option value="every-minutes">Every N minutes</option>
         <option value="every-hours">Every N hours</option>
         <option value="daily">Daily at time</option>
@@ -89,33 +94,33 @@ function CronPicker({ value, onChange }: { value: string; onChange: (cron: strin
 
       {preset.frequency === 'every-minutes' && (
         <div className="flex items-center gap-2">
-          <span className="text-sm text-dim">Every</span>
+          <span className="text-xs text-stone-500">Every</span>
           <input
             type="number" min={1} max={59}
             className={inputClass + ' !w-20'}
             value={preset.interval}
             onChange={e => update({ interval: parseInt(e.target.value) || 1 })}
           />
-          <span className="text-sm text-dim">minutes</span>
+          <span className="text-xs text-stone-500">minutes</span>
         </div>
       )}
 
       {preset.frequency === 'every-hours' && (
         <div className="flex items-center gap-2">
-          <span className="text-sm text-dim">Every</span>
+          <span className="text-xs text-stone-500">Every</span>
           <input
             type="number" min={1} max={23}
             className={inputClass + ' !w-20'}
             value={preset.interval}
             onChange={e => update({ interval: parseInt(e.target.value) || 1 })}
           />
-          <span className="text-sm text-dim">hours</span>
+          <span className="text-xs text-stone-500">hours</span>
         </div>
       )}
 
       {preset.frequency === 'daily' && (
         <div className="flex items-center gap-2">
-          <span className="text-sm text-dim">At</span>
+          <span className="text-xs text-stone-500">At</span>
           <input
             type="time"
             className={inputClass + ' !w-36'}
@@ -127,7 +132,7 @@ function CronPicker({ value, onChange }: { value: string; onChange: (cron: strin
 
       {preset.frequency === 'weekly' && (
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm text-dim">On</span>
+          <span className="text-xs text-stone-500">On</span>
           <select
             className={inputClass + ' !w-36'}
             value={preset.dayOfWeek}
@@ -135,7 +140,7 @@ function CronPicker({ value, onChange }: { value: string; onChange: (cron: strin
           >
             {DAYS.map((d, i) => <option key={i} value={i}>{d}</option>)}
           </select>
-          <span className="text-sm text-dim">at</span>
+          <span className="text-xs text-stone-500">at</span>
           <input
             type="time"
             className={inputClass + ' !w-36'}
@@ -154,7 +159,7 @@ function CronPicker({ value, onChange }: { value: string; onChange: (cron: strin
         />
       )}
 
-      <div className="text-xs text-dim font-mono">Cron: {buildCron(preset)}</div>
+      <div className="text-xs text-stone-600 font-mono">Cron: {buildCron(preset)}</div>
     </div>
   );
 }
@@ -169,6 +174,24 @@ export function Schedules() {
   const [editingSchedule, setEditingSchedule] = useState<Schedule | null>(null);
   const [editCron, setEditCron] = useState('');
   const [editError, setEditError] = useState('');
+  const [scriptSearch, setScriptSearch] = useState('');
+  const [selectedScriptId, setSelectedScriptId] = useState('');
+  const [scriptDropdownOpen, setScriptDropdownOpen] = useState(false);
+  const scriptDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (scriptDropdownRef.current && !scriptDropdownRef.current.contains(e.target as Node)) {
+        setScriptDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const filteredScripts = scripts.filter(s =>
+    s.name.toLowerCase().includes(scriptSearch.toLowerCase())
+  );
 
   const load = async () => {
     await Promise.all([
@@ -210,6 +233,8 @@ export function Schedules() {
       });
       setShowAdd(false);
       setNewCron('*/5 * * * *');
+      setSelectedScriptId('');
+      setScriptSearch('');
       load();
     } catch (err: any) {
       setError(err.message);
@@ -245,87 +270,137 @@ export function Schedules() {
   };
 
   return (
-    <>
-    <div className="h-full sm:h-[100dvh] sm:flex-1 sm:min-h-0 relative overflow-hidden flex flex-col p-4 pb-4">
-      <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 -z-10">
-        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-orange-800 opacity-25 rounded-full blur-[175px] -translate-x-1/3 -translate-y-1/3" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-orange-800 opacity-15 rounded-full blur-[200px] translate-y-1/3" />
+    <div className="lg:h-screen relative flex flex-col lg:overflow-hidden overflow-y-auto p-4">
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900">
+        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-white/50 opacity-25 rounded-full blur-[175px] -translate-x-1/3 -translate-y-1/3" />
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-pink-500 opacity-15 rounded-full blur-[200px] translate-y-1/3" />
       </div>
 
-      <div className="relative flex-1 flex flex-col bg-black/50 border border-white/10 rounded-2xl p-4 sm:p-6 shadow-2xl min-h-0 mb-4">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-          <div className="flex items-center gap-2 mr-auto">
-            <h2 className="ml-2 sm:ml-4 text-xl sm:text-2xl font-bold bg-gradient-to-r from-stone-600 via-stone-400 to-stone-600 bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
-              SCHEDULES
-            </h2>
-          </div>
-          <div className="flex items-center gap-3 text-[11px] text-stone-400 ml-2 sm:ml-0">
+      <div className="relative flex-1 flex flex-col bg-black/70 border border-white/10 rounded-2xl p-6 shadow-2xl min-h-0 overflow-y-auto custom-scrollbar">
+        <div className="shrink-0">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="border border-white/10 ml-2 mr-2 py-4" />
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-stone-600 via-stone-400 to-stone-600 bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
+                Schedules
+              </h2>
+            </div>
             <button
               onClick={() => setShowAdd(true)}
-              className="cursor-pointer ml-auto sm:ml-2 px-2.5 py-1 text-[11px] rounded bg-stone-900 border border-stone-800 text-stone-400 tracking-wider hover:bg-stone-800 hover:text-stone-300 transition-colors disabled:opacity-40"
+              className="cursor-pointer flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/20 text-stone-400 hover:text-stone-300 hover:border-white/20 hover:bg-white/5 transition-all duration-200 text-xs"
             >
-              + Create Schedule
+              <Plus className="w-3.5 h-3.5" />
+              <span>Create Schedule</span>
             </button>
           </div>
         </div>
 
-        <div className="mt-4 border-t border-white/10" />
+        <div className="mt-6 flex flex-col lg:flex-row gap-4 shrink-0">
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-2 shadow-2xl shrink-0">
+            <div className="flex items-center gap-3 whitespace-nowrap">
+              <Clock className="w-4 h-4 ml-2 text-stone-600" />
+              <p className="text-stone-400 text-sm">Total schedules:</p>
+              <p className="mr-2 text-md font-bold text-gray-300">{schedules.length}</p>
+            </div>
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-2 shadow-2xl shrink-0">
+            <div className="flex items-center gap-3 whitespace-nowrap">
+              <Clock className="w-4 h-4 ml-2 text-stone-600" />
+              <p className="text-stone-400 text-sm">Active:</p>
+              <p className="mr-2 text-md font-bold text-green-400">{schedules.filter(s => s.enabled).length}</p>
+            </div>
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-2 shadow-2xl shrink-0">
+            <div className="flex items-center gap-3 whitespace-nowrap">
+              <Clock className="w-4 h-4 ml-2 text-stone-600" />
+              <p className="text-stone-400 text-sm">Disabled:</p>
+              <p className="mr-2 text-md font-bold text-stone-500">{schedules.filter(s => !s.enabled).length}</p>
+            </div>
+          </div>
+        </div>
 
-        <div className="mt-6 border border-stone-800 rounded-lg backdrop-blur-md bg-stone-900/30 overflow-y-auto custom-scrollbar">
-          <div className="bg-surface overflow-hidden">
+        <div className="mt-6 flex-1 min-h-0">
+          <div className="bg-white/5 border border-white/10 backdrop-blur rounded-lg overflow-y-auto custom-scrollbar h-full">
+            <div className="shrink-0">
+              <div className="ml-3 w-[110px]">
+                <h2 className="text-stone-500 mt-3 ml-3">All Schedules</h2>
+                <div className="ml-2 mt-2 border border-white/10 px-1 rounded-lg" />
+              </div>
+            </div>
+
             {isLoading ? (
-              <div className="text-center py-12 text-dim">Loading...</div>
+              <div className="flex flex-col items-center justify-center py-12 gap-2">
+                <Clock className="w-5 h-5 text-stone-700 animate-pulse" />
+                <p className="text-stone-600 text-xs">Loading schedules...</p>
+              </div>
             ) : schedules.length === 0 ? (
-              <div className="text-center py-12 text-dim">
-                {scripts.length === 0 ? (
-                  <p>Add a script first before creating schedules.</p>
-                ) : (
-                  <>
-                    <p className="mb-4">No schedules yet.</p>
-                    <button className={btnPrimary} onClick={() => setShowAdd(true)}>
-                      Create your first schedule
-                    </button>
-                  </>
+              <div className="flex flex-col items-center justify-center py-12 gap-2">
+                <Clock className="w-5 h-5 text-stone-700" />
+                <p className="text-stone-600 text-xs">
+                  {scripts.length === 0 ? 'Add a script first before creating schedules.' : 'No schedules yet'}
+                </p>
+                {scripts.length > 0 && (
+                  <button
+                    onClick={() => setShowAdd(true)}
+                    className="cursor-pointer mt-2 flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 text-stone-500 hover:text-stone-300 hover:border-white/20 hover:bg-white/5 transition-all duration-200 text-xs"
+                  >
+                    <Plus className="w-3 h-3" />
+                    <span>Create your first schedule</span>
+                  </button>
                 )}
               </div>
             ) : (
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr>
-                    {['Enabled', 'Name', 'Script', 'Cron', 'Actions'].map(h => (
-                    <th key={h} className="text-left px-4 py-3 uppercase text-[11px] tracking-wide transition-colors bg-stone-400 text-stone-700">{h}</th>
-                  ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {schedules.map(s => (
-                    <tr key={s.id} className="hover:bg-primary/[0.04]">
-                      <td className={tdClass}>
+              <div className="p-4">
+                {schedules.map((s) => (
+                  <div key={s.id}>
+                    <div className="flex items-center justify-between py-2">
+                      <div className="flex items-center gap-3">
                         <label className="toggle">
                           <input type="checkbox" checked={s.enabled} onChange={() => handleToggle(s)} />
                           <span className="slider"></span>
                         </label>
-                      </td>
-                      <td className={tdClass}>{s.name}</td>
-                      <td className={`${tdClass} text-dim`}>{s.scriptName}</td>
-                      <td className={tdClass}>
-                        <code
-                          className="font-mono text-xs cursor-pointer hover:text-primary transition-colors"
-                          onClick={() => handleEditCron(s)}
-                        >
-                          {s.cron}
-                        </code>
-                      </td>
-                      <td className={tdClass}>
-                        <div className="flex gap-1.5">
-                          <button className={btnBase} onClick={() => handleEditCron(s)}>Edit Cron</button>
-                          <button className={btnDanger} onClick={() => handleDelete(s.id, s.name)}>Delete</button>
+                        <div>
+                          <p className={`text-sm font-semibold ${s.enabled ? 'text-stone-300' : 'text-stone-600'}`}>
+                            {s.name}
+                          </p>
+                          <p className="text-xs text-stone-500 italic">Script:</p>
+                          <p className='font-bold text-xs text-stone-500'> {s.scriptName}</p>
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="border border-white/10 py-3 rounded-lg" />
+                        <div className="ml-4 mr-4 text-xs flex items-center border border-white/10 backdrop-blur rounded-lg p-1 bg-black/40">
+                          <div className="flex items-center gap-2 ml-2 mr-2">
+                            <Clock className="w-3 h-3 text-stone-600" />
+                            <code
+                              className="text-xs font-mono text-stone-400 cursor-pointer hover:text-stone-200 transition-all duration-200"
+                              onClick={() => handleEditCron(s)}
+                            >
+                              {s.cron}
+                            </code>
+                          </div>
+                        </div>
+                        <div className="border border-white/10 py-3 rounded-lg" />
+                        <button
+                          onClick={() => handleEditCron(s)}
+                          className="cursor-pointer p-2 rounded-lg border border-white/10 text-stone-500 hover:text-stone-300 hover:border-white/20 hover:bg-white/5 transition-all duration-200"
+                          title="Edit cron"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(s.id, s.name)}
+                          className="cursor-pointer p-2 rounded-lg border border-white/10 text-red-400 hover:border-red-500/30 hover:bg-red-500/10 transition-all duration-200"
+                          title="Delete schedule"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="border border-white/5" />
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>
@@ -333,11 +408,16 @@ export function Schedules() {
         {editingSchedule && (
           <Modal title="Edit Cron" onClose={() => setEditingSchedule(null)}>
             <div className="mb-4">
-              <label className="block text-xs font-semibold text-dim mb-1">Schedule</label>
+              <label className="block text-xs font-semibold text-stone-500 mb-1">Schedule</label>
               <CronPicker value={editCron} onChange={setEditCron} />
             </div>
-            {editError && <div className="text-danger text-sm mb-3">{editError}</div>}
-            <button className={btnPrimary} onClick={handleSaveEditCron}>Save</button>
+            {editError && <div className="text-red-400 text-xs mb-3">{editError}</div>}
+            <button
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-green-800 text-stone-300 text-xs font-medium cursor-pointer transition-all duration-200 hover:bg-green-600 hover:border-white/20 hover:text-stone-200"
+              onClick={handleSaveEditCron}
+            >
+              Save
+            </button>
           </Modal>
         )}
 
@@ -345,29 +425,71 @@ export function Schedules() {
           <Modal title="Add Schedule" onClose={() => setShowAdd(false)}>
             <form onSubmit={handleAdd}>
               <div className="mb-4">
-                <label className="block text-xs font-semibold text-dim mb-1">Schedule Name</label>
+                <label className="block text-xs font-semibold text-stone-500 mb-1">Schedule Name</label>
                 <input name="name" placeholder="Daily cleanup" className={inputClass} />
               </div>
               <div className="mb-4">
-                <label className="block text-xs font-semibold text-dim mb-1">Script</label>
-                <select name="scriptId" required className={inputClass}>
-                  <option value="">Select a script...</option>
-                  {scripts.map(s => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                  ))}
-                </select>
+                <label className="block text-xs font-semibold text-stone-500 mb-1">Script</label>
+                <input type="hidden" name="scriptId" value={selectedScriptId} required />
+                <div className="relative" ref={scriptDropdownRef}>
+                  <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-stone-500 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={scriptDropdownOpen ? scriptSearch : (scripts.find(s => s.id === selectedScriptId)?.name ?? '')}
+                    onChange={(e) => {
+                      setScriptSearch(e.target.value);
+                      setSelectedScriptId('');
+                      if (!scriptDropdownOpen) setScriptDropdownOpen(true);
+                    }}
+                    onFocus={() => {
+                      setScriptDropdownOpen(true);
+                      setScriptSearch('');
+                    }}
+                    placeholder="Search scripts..."
+                    className={inputClass + ' !pl-8'}
+                    autoComplete="off"
+                  />
+                  <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-stone-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                  {scriptDropdownOpen && (
+                    <div className="absolute z-50 mt-1 w-full rounded-lg border border-white/10 bg-[#1c1c1c] shadow-2xl max-h-48 overflow-y-auto custom-scrollbar">
+                      {filteredScripts.length === 0 ? (
+                        <div className="px-3 py-2 text-xs text-stone-600 font-mono">No scripts found</div>
+                      ) : (
+                        filteredScripts.map(s => (
+                          <div
+                            key={s.id}
+                            onClick={() => {
+                              setSelectedScriptId(s.id);
+                              setScriptSearch(s.name);
+                              setScriptDropdownOpen(false);
+                            }}
+                            className={`px-3 py-1.5 text-xs font-mono cursor-pointer transition-all duration-200 hover:bg-white/5 ${s.id === selectedScriptId ? 'text-stone-200' : 'text-stone-400 hover:text-stone-300'}`}
+                          >
+                            {s.name}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="mb-4">
-                <label className="block text-xs font-semibold text-dim mb-1">Schedule</label>
+                <label className="block text-xs font-semibold text-stone-500 mb-1">Schedule</label>
                 <CronPicker value={newCron} onChange={setNewCron} />
               </div>
-              {error && <div className="text-danger text-sm mb-3">{error}</div>}
-              <button type="submit" className={btnPrimary}>Create Schedule</button>
+              {error && <div className="text-red-400 text-xs mb-3">{error}</div>}
+              <button
+                type="submit"
+                className="cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg border border-green-800 text-stone-300 text-xs font-medium cursor-pointer transition-all duration-200 hover:bg-green-600 hover:border-white/20 hover:text-stone-200"
+              >
+                Create Schedule
+              </button>
             </form>
           </Modal>
         )}
-        </div>
       </div>
-    </>
+    </div>
   );
 }

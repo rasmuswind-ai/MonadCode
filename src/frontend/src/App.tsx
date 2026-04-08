@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Home } from './pages/Home';
 import { Scripts } from './pages/Scripts';
 import { Schedules } from './pages/Schedules';
@@ -13,8 +13,25 @@ const pages: { id: Page; label: string; icon: LucideIcon }[] = [
   { id: 'history', label: 'History', icon: HistoryIcon },
 ];
 
+const validPages: Page[] = ['dashboard', 'scripts', 'schedules', 'history'];
+
+function getPageFromHash(): Page {
+  const hash = window.location.hash.replace('#', '') as Page;
+  return validPages.includes(hash) ? hash : 'dashboard';
+}
+
 export default function App() {
-  const [page, setPage] = useState<Page>('dashboard');
+  const [page, setPage] = useState<Page>(getPageFromHash);
+
+  useEffect(() => {
+    window.location.hash = page;
+  }, [page]);
+
+  useEffect(() => {
+    const onHashChange = () => setPage(getPageFromHash());
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
 
   const renderPage = () => {
     switch (page) {
@@ -70,6 +87,10 @@ export default function App() {
                 </button>
               ))}
               </div>
+            </div>
+
+            <div className='mt-auto px-4 py-3 border-t border-white/[0.06]'>
+              <p className='text-stone-600 text-[11px] font-mono'>v1.1.0</p>
             </div>
         </nav>
         <main className='flex-1 min-w-0 min-h-0 pb-16 md:pb-0'>

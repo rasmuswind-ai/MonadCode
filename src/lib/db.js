@@ -7,7 +7,8 @@ const DB_PATH = getDbPath();
 const DEFAULT_DB = {
   scripts: [],
   schedules: [],
-  history: []
+  history: [],
+  settings: {}
 };
 
 function loadDb() {
@@ -18,7 +19,8 @@ function loadDb() {
       return {
         scripts: data.scripts || [],
         schedules: data.schedules || [],
-        history: data.history || []
+        history: data.history || [],
+        settings: data.settings || {}
       };
     }
   } catch (err) {

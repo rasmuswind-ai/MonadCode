@@ -45,7 +45,6 @@ export function FileBrowser({ onSelect, onClose, initialPath }: FileBrowserProps
 
   return (
     <div>
-      {/* Quick access */}
       <div className="flex items-center gap-2 mb-3">
         {quickAccess.map((qa) => (
           <button
@@ -60,21 +59,17 @@ export function FileBrowser({ onSelect, onClose, initialPath }: FileBrowserProps
         ))}
       </div>
 
-      {/* Current path */}
       <div className="px-3 py-2 rounded-md border border-border bg-bg font-mono text-xs text-dim break-all mb-3">
         {currentPath || '...'}
       </div>
 
-      {/* Error */}
       {error && <div className="text-danger text-sm mb-3">{error}</div>}
 
-      {/* File list */}
-      <div className="border border-stone-800 rounded-lg backdrop-blur-md bg-stone-900/30 max-h-[400px] overflow-y-auto">
+      <div className="border border-stone-800 rounded-lg bg-stone-900 max-h-[400px] overflow-y-auto">
         {loading ? (
           <div className="text-center py-8 text-dim text-sm">Loading...</div>
         ) : (
           <div>
-            {/* Go up */}
             {parent && (
               <button
                 type="button"
@@ -86,7 +81,6 @@ export function FileBrowser({ onSelect, onClose, initialPath }: FileBrowserProps
               </button>
             )}
 
-            {/* Directories */}
             {directories.map((dir) => (
               <button
                 key={dir.path}
@@ -99,7 +93,6 @@ export function FileBrowser({ onSelect, onClose, initialPath }: FileBrowserProps
               </button>
             ))}
 
-            {/* Files */}
             {files.map((file) => (
               <button
                 key={file.path}
@@ -113,7 +106,6 @@ export function FileBrowser({ onSelect, onClose, initialPath }: FileBrowserProps
               </button>
             ))}
 
-            {/* Empty state */}
             {!loading && directories.length === 0 && files.length === 0 && (
               <div className="text-center py-8 text-dim text-sm">
                 No folders or .ps1 files in this directory.
@@ -123,7 +115,6 @@ export function FileBrowser({ onSelect, onClose, initialPath }: FileBrowserProps
         )}
       </div>
 
-      {/* Cancel */}
       <div className="mt-4 flex justify-end">
         <button
           type="button"

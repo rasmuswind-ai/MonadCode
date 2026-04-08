@@ -1,4 +1,4 @@
-import type { Script, Schedule, HistoryEntry, Stats, ChartDataPoint, BrowseResult } from './types';
+import type { Script, Schedule, HistoryEntry, Stats, ChartDataPoint, BrowseResult, Settings, TreeEntry } from './types';
 
 const BASE = '/api';
 
@@ -57,4 +57,13 @@ export const api = {
     const params = dirPath ? `?path=${encodeURIComponent(dirPath)}` : '';
     return request<BrowseResult>(`/browse${params}`);
   },
+
+  // Browse directory tree (folders only, recursive)
+  browseTree: (dirPath: string) =>
+    request<TreeEntry[]>(`/browse/tree?path=${encodeURIComponent(dirPath)}`),
+
+  // Settings
+  getSettings: () => request<Settings>('/settings'),
+  updateSettings: (data: Partial<Settings>) =>
+    request<Settings>('/settings', { method: 'PUT', body: JSON.stringify(data) }),
 };
