@@ -139,9 +139,9 @@ export function Scripts() {
   if (!settingsLoaded) {
     return (
       <div className="lg:h-screen relative flex flex-col lg:overflow-hidden overflow-y-auto p-4">
-        <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 -z-10">
-          <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-orange-800 opacity-25 rounded-full blur-[175px] -translate-x-1/3 -translate-y-1/3" />
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-orange-800 opacity-15 rounded-full blur-[200px] translate-y-1/3" />
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900">
+          <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-white/50 opacity-25 rounded-full blur-[175px] -translate-x-1/3 -translate-y-1/3" />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-pink-500 opacity-15 rounded-full blur-[200px] translate-y-1/3" />
         </div>
         <div className="relative flex-1 flex items-center justify-center bg-black/70 border border-white/10 rounded-2xl p-6 shadow-2xl">
           <div className="flex flex-col items-center gap-2">
@@ -157,9 +157,9 @@ export function Scripts() {
   if (!scriptsFolder) {
     return (
       <div className="lg:h-screen relative flex flex-col lg:overflow-hidden overflow-y-auto p-4">
-        <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 -z-10">
-          <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-orange-800 opacity-25 rounded-full blur-[175px] -translate-x-1/3 -translate-y-1/3" />
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-orange-800 opacity-15 rounded-full blur-[200px] translate-y-1/3" />
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900">
+          <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-white/50 opacity-25 rounded-full blur-[175px] -translate-x-1/3 -translate-y-1/3" />
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-pink-500 opacity-15 rounded-full blur-[200px] translate-y-1/3" />
         </div>
         <div className="relative flex-1 flex flex-col bg-black/70 border border-white/10 rounded-2xl p-6 shadow-2xl min-h-0 overflow-y-auto custom-scrollbar">
           <div className="shrink-0">
