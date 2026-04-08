@@ -272,7 +272,7 @@ export function Schedules() {
         <div className="mt-4 border-t border-white/10" />
 
         <div className="mt-6 border border-stone-800 rounded-lg backdrop-blur-md bg-stone-900/30 overflow-y-auto custom-scrollbar">
-          <div className="bg-surface rounded-[10px] overflow-hidden">
+          <div className="bg-surface overflow-hidden">
             {isLoading ? (
               <div className="text-center py-12 text-dim">Loading...</div>
             ) : schedules.length === 0 ? (
