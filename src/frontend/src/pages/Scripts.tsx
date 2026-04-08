@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api';
 import { Modal } from '../components/Modal';
+import { FileBrowser } from '../components/FileBrowser';
 import type { Script } from '../types';
+
+function dirname(p: string): string {
+  const i = Math.max(p.lastIndexOf('\\'), p.lastIndexOf('/'));
+  return i > 0 ? p.substring(0, i) : '';
+}
 
 const btnBase = 'cursor-pointer ml-auto sm:ml-2 px-2.5 py-1 text-[11px] rounded bg-stone-900 border border-stone-800 text-stone-100 tracking-wider hover:bg-stone-800 hover:text-stone-100 transition-colors disabled:opacity-40';
 const btnPrimary = 'inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary border border-primary text-black text-sm font-medium cursor-pointer transition-all hover:bg-primary-hover hover:border-primary-hover disabled:opacity-50 disabled:cursor-not-allowed';
@@ -185,32 +191,66 @@ function ScriptForm({
   error: string;
   initial?: Script;
 }) {
+  const [pathValue, setPathValue] = useState(initial?.path ?? '');
+  const [showBrowser, setShowBrowser] = useState(false);
+
   return (
-    <form onSubmit={onSubmit}>
-      <div className="mb-4">
-        <label className="block text-xs font-semibold text-dim mb-1">Name</label>
-        <input name="name" required defaultValue={initial?.name} placeholder="Cleanup Temp Files" className={inputClass} />
-      </div>
-      <div className="mb-4">
-        <label className="block text-xs font-semibold text-dim mb-1">Script Path</label>
-        <input name="path" required defaultValue={initial?.path} placeholder="C:\Scripts\cleanup.ps1" className={inputClass} />
-        <div className="text-xs text-dim mt-1">Full path to a .ps1 file on this machine</div>
-      </div>
-      <div className="mb-4">
-        <label className="block text-xs font-semibold text-dim mb-1">Description</label>
-        <input name="description" defaultValue={initial?.description} placeholder="Optional description" className={inputClass} />
-      </div>
-      <div className="mb-4">
-        <label className="block text-xs font-semibold text-dim mb-1">Timeout (seconds)</label>
-        <input name="timeoutSeconds" type="number" defaultValue={initial?.timeoutSeconds ?? 300} min={1} className={inputClass} />
-      </div>
-      {error && <div className="text-danger text-sm mb-3">{error}</div>}
-      <button
-        type="submit"
-        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary border border-primary text-black text-sm font-medium cursor-pointer transition-all hover:bg-primary-hover hover:border-primary-hover"
-      >
-        {initial ? 'Save' : 'Add Script'}
-      </button>
-    </form>
+    <>
+      <form onSubmit={onSubmit}>
+        <div className="mb-4">
+          <label className="block text-xs font-semibold text-dim mb-1">Name</label>
+          <input name="name" required defaultValue={initial?.name} placeholder="Cleanup Temp Files" className={inputClass} />
+        </div>
+        <div className="mb-4">
+          <label className="block text-xs font-semibold text-dim mb-1">Script Path</label>
+          <div className="flex gap-2">
+            <input
+              name="path"
+              required
+              value={pathValue}
+              onChange={(e) => setPathValue(e.target.value)}
+              placeholder="C:\Scripts\cleanup.ps1"
+              className={inputClass}
+            />
+            <button
+              type="button"
+              onClick={() => setShowBrowser(true)}
+              className="cursor-pointer shrink-0 px-2.5 py-1 text-[11px] rounded bg-stone-900 border border-stone-800 text-stone-400 tracking-wider hover:bg-stone-800 hover:text-stone-300 transition-colors"
+            >
+              Browse
+            </button>
+          </div>
+          <div className="text-xs text-dim mt-1">Full path to a .ps1 file on this machine</div>
+        </div>
+        <div className="mb-4">
+          <label className="block text-xs font-semibold text-dim mb-1">Description</label>
+          <input name="description" defaultValue={initial?.description} placeholder="Optional description" className={inputClass} />
+        </div>
+        <div className="mb-4">
+          <label className="block text-xs font-semibold text-dim mb-1">Timeout (seconds)</label>
+          <input name="timeoutSeconds" type="number" defaultValue={initial?.timeoutSeconds ?? 300} min={1} className={inputClass} />
+        </div>
+        {error && <div className="text-danger text-sm mb-3">{error}</div>}
+        <button
+          type="submit"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-primary border border-primary text-black text-sm font-medium cursor-pointer transition-all hover:bg-primary-hover hover:border-primary-hover"
+        >
+          {initial ? 'Save' : 'Add Script'}
+        </button>
+      </form>
+
+      {showBrowser && (
+        <Modal title="Browse for Script" onClose={() => setShowBrowser(false)}>
+          <FileBrowser
+            initialPath={pathValue ? dirname(pathValue) : undefined}
+            onSelect={(filePath) => {
+              setPathValue(filePath);
+              setShowBrowser(false);
+            }}
+            onClose={() => setShowBrowser(false)}
+          />
+        </Modal>
+      )}
+    </>
   );
 }

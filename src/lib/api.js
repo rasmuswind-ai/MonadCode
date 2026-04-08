@@ -1,11 +1,65 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const { v4: uuidv4 } = require('uuid');
 const { saveDb } = require('./db');
 const cron = require('node-cron');
 
 const router = express.Router();
+
+// ── Browse filesystem ───────────────────────────────
+
+router.get('/browse', (req, res) => {
+  const dirPath = path.resolve(req.query.path || os.homedir());
+
+  try {
+    const stat = fs.statSync(dirPath);
+    if (!stat.isDirectory()) {
+      return res.status(400).json({ error: 'Path is not a directory' });
+    }
+  } catch (err) {
+    if (err.code === 'ENOENT') return res.status(404).json({ error: 'Directory not found' });
+    if (err.code === 'EPERM' || err.code === 'EACCES') return res.status(403).json({ error: 'Access denied' });
+    return res.status(500).json({ error: err.message });
+  }
+
+  const directories = [];
+  const files = [];
+
+  try {
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+    for (const entry of entries) {
+      try {
+        const fullPath = path.join(dirPath, entry.name);
+        if (entry.isDirectory()) {
+          directories.push({ name: entry.name, path: fullPath });
+        } else if (entry.isFile() && entry.name.toLowerCase().endsWith('.ps1')) {
+          files.push({ name: entry.name, path: fullPath });
+        }
+      } catch { /* skip broken symlinks / inaccessible entries */ }
+    }
+  } catch (err) {
+    if (err.code === 'EPERM' || err.code === 'EACCES') return res.status(403).json({ error: 'Access denied' });
+    return res.status(500).json({ error: err.message });
+  }
+
+  directories.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+  files.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+
+  const parent = path.dirname(dirPath);
+
+  res.json({
+    current: dirPath,
+    parent: parent === dirPath ? null : parent,
+    directories,
+    files,
+    quickAccess: [
+      { name: 'Home', path: os.homedir() },
+      { name: 'C:\\', path: 'C:\\' },
+    ],
+  });
+});
 
 // ── Scripts ──────────────────────────────────────────
 

@@ -46,4 +46,17 @@ export interface ChartDataPoint {
   failed: number;
 }
 
+export interface BrowseEntry {
+  name: string;
+  path: string;
+}
+
+export interface BrowseResult {
+  current: string;
+  parent: string | null;
+  directories: BrowseEntry[];
+  files: BrowseEntry[];
+  quickAccess: BrowseEntry[];
+}
+
 export type Page = 'dashboard' | 'scripts' | 'schedules' | 'history' | 'fat_fingers';

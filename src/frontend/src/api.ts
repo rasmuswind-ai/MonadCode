@@ -1,4 +1,4 @@
-import type { Script, Schedule, HistoryEntry, Stats, ChartDataPoint } from './types';
+import type { Script, Schedule, HistoryEntry, Stats, ChartDataPoint, BrowseResult } from './types';
 
 const BASE = '/api';
 
@@ -51,4 +51,10 @@ export const api = {
 
   // Chart
   getChartData: () => request<ChartDataPoint[]>('/history/chart'),
+
+  // Browse filesystem
+  browse: (dirPath?: string) => {
+    const params = dirPath ? `?path=${encodeURIComponent(dirPath)}` : '';
+    return request<BrowseResult>(`/browse${params}`);
+  },
 };
