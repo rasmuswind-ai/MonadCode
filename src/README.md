@@ -15,27 +15,13 @@ Lightweight PowerShell script scheduler with a web UI. A minimal alternative to 
 ## Quick Start
 
 ```bash
-# Start the server directly
-node server.js
-
 # Open in browser
 start http://127.0.0.1:5088
 ```
 
 ## Install Monad Code
 
-Download the exe file from the repo.
-Run your desired teminal as Administrator:
-
-```bash
-.\monadcode.exe install
-```
-
-To remove the Monad Code:
-
-```bash
-.\monadcode.exe uninstall
-```
+Download the msi file from the repo.
 
 ## Configuration
 
@@ -58,15 +44,6 @@ node server.js
 | `0 0 1 * *`     | First day of each month   |
 
 ## Development
-
-To modify the frontend:
-
-```bash
-cd frontend
-npm install
-npm run dev    # Dev server with hot reload (proxies API to :5088)
-npm run build  # Build to ../wwwroot
-```
 
 ## Project Structure
 
