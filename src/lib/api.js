@@ -13,6 +13,46 @@ const router = express.Router();
 function getQuickAccess() {
   const items = [{ name: 'Home', path: os.homedir() }];
   if (os.platform() === 'win32') {
+    // Detect OneDrive folders on Windows
+    const oneDrivePaths = new Set();
+    for (const envVar of ['OneDrive', 'OneDriveConsumer', 'OneDriveCommercial']) {
+      if (process.env[envVar]) oneDrivePaths.add(path.resolve(process.env[envVar]));
+    }
+    // Scan home directory for OneDrive folders — use statSync fallback for
+    // cloud-only reparse points where dirent.isDirectory() returns false
+    try {
+      const homeEntries = fs.readdirSync(os.homedir(), { withFileTypes: true });
+      for (const entry of homeEntries) {
+        if (!entry.name.startsWith('OneDrive')) continue;
+        const fullPath = path.join(os.homedir(), entry.name);
+        if (entry.isDirectory()) {
+          oneDrivePaths.add(fullPath);
+        } else {
+          try {
+            if (fs.statSync(fullPath).isDirectory()) oneDrivePaths.add(fullPath);
+          } catch { /* skip */ }
+        }
+      }
+    } catch { /* ignore */ }
+    // Also check Windows registry for OneDrive account paths
+    try {
+      const { execSync } = require('child_process');
+      const regOutput = execSync(
+        'reg query "HKCU\\Software\\Microsoft\\OneDrive\\Accounts" /s /v UserFolder 2>nul',
+        { encoding: 'utf8', timeout: 3000 }
+      );
+      for (const line of regOutput.split('\n')) {
+        const match = line.match(/UserFolder\s+REG_SZ\s+(.+)/i);
+        if (match) oneDrivePaths.add(path.resolve(match[1].trim()));
+      }
+    } catch { /* registry not available */ }
+    for (const odPath of oneDrivePaths) {
+      try {
+        fs.accessSync(odPath, fs.constants.R_OK);
+        items.push({ name: path.basename(odPath), path: odPath });
+      } catch { /* not accessible */ }
+    }
+
     // Detect available drive letters on Windows
     for (let code = 65; code <= 90; code++) {
       const drive = String.fromCharCode(code) + ':\\';
@@ -25,6 +65,14 @@ function getQuickAccess() {
     items.push({ name: '/', path: '/' });
   }
   return items;
+}
+
+// Check if a dirent is a directory, falling back to statSync for reparse
+// points (e.g. OneDrive cloud-only folders where dirent.isDirectory() is false)
+function isDir(entry, parentDir) {
+  if (entry.isDirectory()) return true;
+  if (entry.isFile() || entry.isSymbolicLink()) return false;
+  try { return fs.statSync(path.join(parentDir, entry.name)).isDirectory(); } catch { return false; }
 }
 
 // ── Browse filesystem ───────────────────────────────
@@ -51,7 +99,7 @@ router.get('/browse', (req, res) => {
     for (const entry of entries) {
       try {
         const fullPath = path.join(dirPath, entry.name);
-        if (entry.isDirectory()) {
+        if (isDir(entry, dirPath)) {
           directories.push({ name: entry.name, path: fullPath });
         } else if (entry.isFile() && entry.name.toLowerCase().endsWith('.ps1')) {
           files.push({ name: entry.name, path: fullPath });
@@ -106,7 +154,7 @@ router.get('/browse/tree', (req, res) => {
 
     const result = [];
     for (const entry of entries) {
-      if (!entry.isDirectory()) continue;
+      if (!isDir(entry, dir)) continue;
       // Skip hidden/system folders
       if (entry.name.startsWith('.') || entry.name === 'node_modules') continue;
       try {

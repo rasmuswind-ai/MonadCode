@@ -90,7 +90,7 @@ export default function App() {
             </div>
 
             <div className='mt-auto px-4 py-3 border-t border-white/[0.06]'>
-              <p className='text-stone-600 text-[11px] font-mono'>v1.1.0</p>
+              <p className='text-stone-600 text-[11px] font-mono'>v1.1.2</p>
             </div>
         </nav>
         <main className='flex-1 min-w-0 min-h-0 pb-16 md:pb-0'>
