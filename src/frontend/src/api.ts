@@ -66,4 +66,10 @@ export const api = {
   getSettings: () => request<Settings>('/settings'),
   updateSettings: (data: Partial<Settings>) =>
     request<Settings>('/settings', { method: 'PUT', body: JSON.stringify(data) }),
+
+  // Version
+  checkForUpdate: () =>
+    request<{ currentVersion: string; latestVersion: string; updateAvailable: boolean; msiUrl: string }>('/version/check'),
+  installUpdate: () =>
+    request<{ ok: boolean; message: string }>('/version/update', { method: 'POST' }),
 };

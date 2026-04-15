@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../api';
 import { Modal } from '../components/Modal';
-import type { Schedule, Script } from '../types';
+import { FolderTree } from '../components/FolderTree';
+import type { Schedule, Script, TreeEntry } from '../types';
 import {
   Clock,
   Plus,
   Trash2,
   Pencil,
   Search,
+  FolderOpen,
+  RefreshCw,
 } from 'lucide-react';
 
 const inputClass = 'cursor-text w-full bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-stone-300 placeholder-stone-600 focus:outline-none focus:border-stone-500/50 transition-colors font-mono';
@@ -179,6 +182,12 @@ export function Schedules() {
   const [scriptDropdownOpen, setScriptDropdownOpen] = useState(false);
   const scriptDropdownRef = useRef<HTMLDivElement>(null);
 
+  // Folder tree state
+  const [scriptsFolder, setScriptsFolder] = useState<string | null>(null);
+  const [folderTree, setFolderTree] = useState<TreeEntry[]>([]);
+  const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
+  const [treeLoading, setTreeLoading] = useState(false);
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (scriptDropdownRef.current && !scriptDropdownRef.current.contains(e.target as Node)) {
@@ -193,6 +202,17 @@ export function Schedules() {
     s.name.toLowerCase().includes(scriptSearch.toLowerCase())
   );
 
+  const loadTree = async (folder: string) => {
+    setTreeLoading(true);
+    try {
+      const tree = await api.browseTree(folder);
+      setFolderTree(tree);
+    } catch {
+      setFolderTree([]);
+    }
+    setTreeLoading(false);
+  };
+
   const load = async () => {
     await Promise.all([
       api.getSchedules().then(setSchedules),
@@ -206,6 +226,11 @@ export function Schedules() {
     (async () => {
       try {
         await load();
+        const settings = await api.getSettings();
+        if (settings.scriptsFolder) {
+          setScriptsFolder(settings.scriptsFolder);
+          loadTree(settings.scriptsFolder);
+        }
       } finally {
         const elapsed = Date.now() - start;
         const remaining = Math.max(0, 500 - elapsed);
@@ -219,6 +244,17 @@ export function Schedules() {
       mounted = false;
     };
   }, []);
+
+  // Filter schedules by selected folder (via associated script path)
+  const filteredSchedules = selectedFolder
+    ? schedules.filter(s => {
+        const script = scripts.find(sc => sc.id === s.scriptId);
+        if (!script) return false;
+        const normalizedPath = script.path.replace(/\//g, '\\');
+        const normalizedFolder = selectedFolder.replace(/\//g, '\\');
+        return normalizedPath.startsWith(normalizedFolder + '\\');
+      })
+    : schedules;
 
   const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -276,136 +312,188 @@ export function Schedules() {
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-pink-500 opacity-15 rounded-full blur-[200px] translate-y-1/3" />
       </div>
 
-      <div className="relative flex-1 flex flex-col bg-black/70 border border-white/10 rounded-2xl p-6 shadow-2xl min-h-0 overflow-y-auto custom-scrollbar">
-        <div className="shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="border border-white/10 ml-2 mr-2 py-4" />
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-stone-600 via-stone-400 to-stone-600 bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
-                Schedules
-              </h2>
-            </div>
-            <button
-              onClick={() => setShowAdd(true)}
-              className="cursor-pointer flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/20 text-stone-400 hover:text-stone-300 hover:border-white/20 hover:bg-white/5 transition-all duration-200 text-xs"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Create Schedule</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-6 flex flex-col lg:flex-row gap-4 shrink-0">
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-2 shadow-2xl shrink-0">
-            <div className="flex items-center gap-3 whitespace-nowrap">
-              <Clock className="w-4 h-4 ml-2 text-stone-600" />
-              <p className="text-stone-400 text-sm">Total schedules:</p>
-              <p className="mr-2 text-md font-bold text-gray-300">{schedules.length}</p>
-            </div>
-          </div>
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-2 shadow-2xl shrink-0">
-            <div className="flex items-center gap-3 whitespace-nowrap">
-              <Clock className="w-4 h-4 ml-2 text-stone-600" />
-              <p className="text-stone-400 text-sm">Active:</p>
-              <p className="mr-2 text-md font-bold text-green-400">{schedules.filter(s => s.enabled).length}</p>
-            </div>
-          </div>
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-2 shadow-2xl shrink-0">
-            <div className="flex items-center gap-3 whitespace-nowrap">
-              <Clock className="w-4 h-4 ml-2 text-stone-600" />
-              <p className="text-stone-400 text-sm">Disabled:</p>
-              <p className="mr-2 text-md font-bold text-stone-500">{schedules.filter(s => !s.enabled).length}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-6 flex-1 min-h-0">
-          <div className="bg-white/5 border border-white/10 backdrop-blur rounded-lg overflow-y-auto custom-scrollbar h-full">
-            <div className="shrink-0">
-              <div className="ml-3 w-[110px]">
-                <h2 className="text-stone-500 mt-3 ml-3">All Schedules</h2>
-                <div className="ml-2 mt-2 border border-white/10 px-1 rounded-lg" />
+      <div className="relative flex-1 flex bg-black/70 border border-white/10 rounded-2xl shadow-2xl min-h-0 overflow-hidden">
+        {/* Left sidebar — folder tree */}
+        {scriptsFolder && (
+          <div className="w-[220px] shrink-0 border-r border-white/10 flex flex-col">
+            <div className="px-3 py-3 border-b border-white/10 shrink-0">
+              <div className="flex items-center justify-between">
+                <p className="text-stone-500 text-[11px] uppercase tracking-wider font-medium">Explorer</p>
+                <button
+                  onClick={() => loadTree(scriptsFolder)}
+                  className="cursor-pointer p-1 rounded text-stone-600 hover:text-stone-400 transition-colors"
+                  title="Refresh tree"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                </button>
               </div>
             </div>
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
+              {treeLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <p className="text-stone-600 text-xs">Scanning...</p>
+                </div>
+              ) : (
+                <FolderTree
+                  tree={folderTree}
+                  selectedPath={selectedFolder}
+                  rootPath={scriptsFolder}
+                  onSelect={setSelectedFolder}
+                />
+              )}
+            </div>
+          </div>
+        )}
 
-            {isLoading ? (
-              <div className="flex flex-col items-center justify-center py-12 gap-2">
-                <Clock className="w-5 h-5 text-stone-700 animate-pulse" />
-                <p className="text-stone-600 text-xs">Loading schedules...</p>
+        {/* Right content — schedule list */}
+        <div className="flex-1 flex flex-col p-6 min-w-0 overflow-y-auto custom-scrollbar">
+          <div className="shrink-0">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="border border-white/10 ml-2 mr-2 py-4" />
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-stone-600 via-stone-400 to-stone-600 bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
+                  Schedules
+                </h2>
               </div>
-            ) : schedules.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 gap-2">
-                <Clock className="w-5 h-5 text-stone-700" />
-                <p className="text-stone-600 text-xs">
-                  {scripts.length === 0 ? 'Add a script first before creating schedules.' : 'No schedules yet'}
+              <button
+                onClick={() => setShowAdd(true)}
+                className="cursor-pointer flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/20 text-stone-400 hover:text-stone-300 hover:border-white/20 hover:bg-white/5 transition-all duration-200 text-xs"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Create Schedule</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-6 flex flex-col lg:flex-row gap-4 shrink-0">
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-2 shadow-2xl shrink-0">
+              <div className="flex items-center gap-3 whitespace-nowrap">
+                <Clock className="w-4 h-4 ml-2 text-stone-600" />
+                <p className="text-stone-400 text-sm">
+                  {selectedFolder ? 'Schedules in folder:' : 'Total schedules:'}
                 </p>
-                {scripts.length > 0 && (
-                  <button
-                    onClick={() => setShowAdd(true)}
-                    className="cursor-pointer mt-2 flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 text-stone-500 hover:text-stone-300 hover:border-white/20 hover:bg-white/5 transition-all duration-200 text-xs"
-                  >
-                    <Plus className="w-3 h-3" />
-                    <span>Create your first schedule</span>
-                  </button>
-                )}
+                <p className="mr-2 text-md font-bold text-gray-300">{filteredSchedules.length}</p>
               </div>
-            ) : (
-              <div className="p-4">
-                {schedules.map((s) => (
-                  <div key={s.id}>
-                    <div className="flex items-center justify-between py-2">
-                      <div className="flex items-center gap-3">
-                        <label className="toggle">
-                          <input type="checkbox" checked={s.enabled} onChange={() => handleToggle(s)} />
-                          <span className="slider"></span>
-                        </label>
-                        <div>
-                          <p className={`text-sm font-semibold ${s.enabled ? 'text-stone-300' : 'text-stone-600'}`}>
-                            {s.name}
-                          </p>
-                          <p className="text-xs text-stone-500 italic">Script:</p>
-                          <p className='font-bold text-xs text-stone-500'> {s.scriptName}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="border border-white/10 py-3 rounded-lg" />
-                        <div className="ml-4 mr-4 text-xs flex items-center border border-white/10 backdrop-blur rounded-lg p-1 bg-black/40">
-                          <div className="flex items-center gap-2 ml-2 mr-2">
-                            <Clock className="w-3 h-3 text-stone-600" />
-                            <code
-                              className="text-xs font-mono text-stone-400 cursor-pointer hover:text-stone-200 transition-all duration-200"
-                              onClick={() => handleEditCron(s)}
-                            >
-                              {s.cron}
-                            </code>
-                          </div>
-                        </div>
-                        <div className="border border-white/10 py-3 rounded-lg" />
-                        <button
-                          onClick={() => handleEditCron(s)}
-                          className="cursor-pointer p-2 rounded-lg border border-white/10 text-stone-500 hover:text-stone-300 hover:border-white/20 hover:bg-white/5 transition-all duration-200"
-                          title="Edit cron"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(s.id, s.name)}
-                          className="cursor-pointer p-2 rounded-lg border border-white/10 text-red-400 hover:border-red-500/30 hover:bg-red-500/10 transition-all duration-200"
-                          title="Delete schedule"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="border border-white/5" />
-                  </div>
-                ))}
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-2 shadow-2xl shrink-0">
+              <div className="flex items-center gap-3 whitespace-nowrap">
+                <Clock className="w-4 h-4 ml-2 text-stone-600" />
+                <p className="text-stone-400 text-sm">Active:</p>
+                <p className="mr-2 text-md font-bold text-green-400">{filteredSchedules.filter(s => s.enabled).length}</p>
+              </div>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-2 shadow-2xl shrink-0">
+              <div className="flex items-center gap-3 whitespace-nowrap">
+                <Clock className="w-4 h-4 ml-2 text-stone-600" />
+                <p className="text-stone-400 text-sm">Disabled:</p>
+                <p className="mr-2 text-md font-bold text-stone-500">{filteredSchedules.filter(s => !s.enabled).length}</p>
+              </div>
+            </div>
+            {selectedFolder && (
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-2 shadow-2xl shrink-0">
+                <div className="flex items-center gap-3 whitespace-nowrap">
+                  <FolderOpen className="w-4 h-4 ml-2 text-stone-600" />
+                  <p className="mr-2 text-stone-400 text-sm truncate max-w-[300px]">
+                    {selectedFolder.split(/[/\\]/).pop()}
+                  </p>
+                </div>
               </div>
             )}
           </div>
-        </div>
 
-        {editingSchedule && (
+          <div className="mt-6 flex-1 min-h-0">
+            <div className="bg-white/5 border border-white/10 backdrop-blur rounded-lg overflow-y-auto custom-scrollbar h-full">
+              <div className="shrink-0">
+                <div className="ml-3 w-fit">
+                  <h2 className="text-stone-500 mt-3 ml-3">
+                    {selectedFolder ? selectedFolder.split(/[/\\]/).pop() : 'All Schedules'}
+                  </h2>
+                  <div className="ml-2 mt-2 border border-white/10 px-1 rounded-lg" />
+                </div>
+              </div>
+
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center py-12 gap-2">
+                  <Clock className="w-5 h-5 text-stone-700 animate-pulse" />
+                  <p className="text-stone-600 text-xs">Loading schedules...</p>
+                </div>
+              ) : filteredSchedules.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 gap-2">
+                  <Clock className="w-5 h-5 text-stone-700" />
+                  <p className="text-stone-600 text-xs">
+                    {scripts.length === 0
+                      ? 'Add a script first before creating schedules.'
+                      : selectedFolder
+                        ? 'No schedules for scripts in this folder.'
+                        : 'No schedules yet'}
+                  </p>
+                  {scripts.length > 0 && !selectedFolder && (
+                    <button
+                      onClick={() => setShowAdd(true)}
+                      className="cursor-pointer mt-2 flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 text-stone-500 hover:text-stone-300 hover:border-white/20 hover:bg-white/5 transition-all duration-200 text-xs"
+                    >
+                      <Plus className="w-3 h-3" />
+                      <span>Create your first schedule</span>
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="p-4">
+                  {filteredSchedules.map((s) => (
+                    <div key={s.id}>
+                      <div className="flex items-center justify-between py-2">
+                        <div className="flex items-center gap-3">
+                          <label className="toggle">
+                            <input type="checkbox" checked={s.enabled} onChange={() => handleToggle(s)} />
+                            <span className="slider"></span>
+                          </label>
+                          <div>
+                            <p className={`text-sm font-semibold ${s.enabled ? 'text-stone-300' : 'text-stone-600'}`}>
+                              {s.name}
+                            </p>
+                            <p className="text-xs text-stone-500 italic">Script:</p>
+                            <p className='font-bold text-xs text-stone-500'> {s.scriptName}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="border border-white/10 py-3 rounded-lg" />
+                          <div className="ml-4 mr-4 text-xs flex items-center border border-white/10 backdrop-blur rounded-lg p-1 bg-black/40">
+                            <div className="flex items-center gap-2 ml-2 mr-2">
+                              <Clock className="w-3 h-3 text-stone-600" />
+                              <code
+                                className="text-xs font-mono text-stone-400 cursor-pointer hover:text-stone-200 transition-all duration-200"
+                                onClick={() => handleEditCron(s)}
+                              >
+                                {s.cron}
+                              </code>
+                            </div>
+                          </div>
+                          <div className="border border-white/10 py-3 rounded-lg" />
+                          <button
+                            onClick={() => handleEditCron(s)}
+                            className="cursor-pointer p-2 rounded-lg border border-white/10 text-stone-500 hover:text-stone-300 hover:border-white/20 hover:bg-white/5 transition-all duration-200"
+                            title="Edit cron"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(s.id, s.name)}
+                            className="cursor-pointer p-2 rounded-lg border border-white/10 text-red-400 hover:border-red-500/30 hover:bg-red-500/10 transition-all duration-200"
+                            title="Delete schedule"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="border border-white/5" />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {editingSchedule && (
           <Modal title="Edit Cron" onClose={() => setEditingSchedule(null)}>
             <div className="mb-4">
               <label className="block text-xs font-semibold text-stone-500 mb-1">Schedule</label>
@@ -489,6 +577,7 @@ export function Schedules() {
             </form>
           </Modal>
         )}
+        </div>
       </div>
     </div>
   );

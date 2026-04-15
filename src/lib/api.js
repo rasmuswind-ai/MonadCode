@@ -8,6 +8,9 @@ const cron = require('node-cron');
 
 const router = express.Router();
 
+const CURRENT_VERSION = '1.1.81';
+const VERSION_CHECK_URL = 'https://monad-code.com/version.json';
+
 // ── Helpers ─────────────────────────────────────────
 
 function getQuickAccess() {
@@ -415,6 +418,68 @@ router.get('/stats', (req, res) => {
     successes24h: recentHistory.filter(h => h.status === 'success').length,
     failures24h: recentHistory.filter(h => h.status === 'failed' || h.status === 'error').length
   });
+});
+
+// ── Version check & update ──────────────────────────
+
+function compareVersions(a, b) {
+  const pa = a.split('.').map(Number);
+  const pb = b.split('.').map(Number);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const na = pa[i] || 0;
+    const nb = pb[i] || 0;
+    if (na < nb) return -1;
+    if (na > nb) return 1;
+  }
+  return 0;
+}
+
+router.get('/version/check', async (req, res) => {
+  try {
+    const response = await fetch(VERSION_CHECK_URL, { signal: AbortSignal.timeout(10000) });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    const latestVersion = data.version;
+    res.json({
+      currentVersion: CURRENT_VERSION,
+      latestVersion,
+      updateAvailable: compareVersions(CURRENT_VERSION, latestVersion) < 0,
+      msiUrl: data.msiUrl || 'https://monad-code.com/MonadCode.msi',
+    });
+  } catch (err) {
+    res.status(502).json({ error: 'Could not check for updates: ' + err.message });
+  }
+});
+
+router.post('/version/update', async (req, res) => {
+  const { exec } = require('child_process');
+  const tmpDir = os.tmpdir();
+  const msiPath = path.join(tmpDir, 'MonadCode-update.msi');
+
+  try {
+    // Fetch latest version info
+    const response = await fetch(VERSION_CHECK_URL, { signal: AbortSignal.timeout(10000) });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    const msiUrl = data.msiUrl || 'https://monad-code.com/MonadCode.msi';
+
+    // Download the MSI
+    const msiResponse = await fetch(msiUrl, { signal: AbortSignal.timeout(120000) });
+    if (!msiResponse.ok) throw new Error(`Failed to download MSI: HTTP ${msiResponse.status}`);
+    const buffer = Buffer.from(await msiResponse.arrayBuffer());
+    fs.writeFileSync(msiPath, buffer);
+
+    // Send response first, then launch installer (which will kill this process)
+    res.json({ ok: true, message: 'Update started. The service will restart shortly.' });
+
+    // Fire-and-forget: launch msiexec detached so it runs after the service stops
+    exec(`msiexec /i "${msiPath}" /quiet /norestart`, {
+      shell: 'cmd.exe',
+      windowsHide: true,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Update failed: ' + err.message });
+  }
 });
 
 module.exports = router;
