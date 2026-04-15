@@ -119,7 +119,7 @@ export default function App() {
 
             <div className='mt-auto px-4 py-3 border-t border-white/[0.06]'>
               <div className='flex items-center gap-2'>
-                <p className='mr-auto text-stone-600 text-[11px] font-mono'>v1.1.81</p>
+                <p className='mr-auto text-stone-600 text-[11px] font-mono'>v1.1.82</p>
                 {updateAvailable && updateState === 'idle' && (
                   <button
                     onClick={() => setUpdateState('confirm')}

@@ -78,7 +78,7 @@ export function Scripts() {
         name: form.get('name') as string,
         path: form.get('path') as string,
         description: form.get('description') as string,
-        timeoutSeconds: parseInt(form.get('timeoutSeconds') as string) || 300,
+        timeoutSeconds: Number.isNaN(parseInt(form.get('timeoutSeconds') as string)) ? 300 : parseInt(form.get('timeoutSeconds') as string),
       });
       setShowAdd(false);
       load();
@@ -97,7 +97,7 @@ export function Scripts() {
         name: form.get('name') as string,
         path: form.get('path') as string,
         description: form.get('description') as string,
-        timeoutSeconds: parseInt(form.get('timeoutSeconds') as string) || 300,
+        timeoutSeconds: Number.isNaN(parseInt(form.get('timeoutSeconds') as string)) ? 300 : parseInt(form.get('timeoutSeconds') as string),
       });
       setEditScript(null);
       load();
@@ -342,7 +342,7 @@ export function Scripts() {
                           <div className="ml-4 mr-4 text-xs flex items-center border border-white/10 backdrop-blur rounded-lg p-1 bg-black/40">
                             <div className="flex items-center gap-2 ml-2 mr-2">
                               <Clock className="w-3 h-3 text-stone-600" />
-                              <span className="text-xs font-mono text-stone-400">{s.timeoutSeconds}s</span>
+                              <span className="text-xs font-mono text-stone-400">{s.timeoutSeconds ? `${s.timeoutSeconds}s` : 'No timeout'}</span>
                             </div>
                           </div>
                           <div className="border border-white/10 py-3 rounded-lg" />
@@ -592,7 +592,10 @@ function ScriptForm({
       </div>
       <div className="mb-4">
         <label className="block text-xs font-semibold text-stone-500 mb-1">Timeout (seconds)</label>
-        <input name="timeoutSeconds" type="number" defaultValue={initial?.timeoutSeconds ?? 300} min={1} className={inputClass} />
+        <div className="flex items-center gap-3">
+          <input name="timeoutSeconds" type="number" defaultValue={initial?.timeoutSeconds ?? 300} min={0} className={inputClass} />
+        </div>
+        <p className="text-[11px] text-stone-600 mt-1">Set to 0 for no timeout</p>
       </div>
       {error && <div className="text-red-400 text-xs mb-3">{error}</div>}
       <button

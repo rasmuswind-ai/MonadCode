@@ -7,7 +7,7 @@ REM Restore WiX .NET tool
 dotnet tool restore
 
 REM Build the MSI
-dotnet tool run wix build -arch x64 -o ..\src\dist\MonadCode_v1.1.81_x64.msi MonadCode.wxs
+dotnet tool run wix build -arch x64 -o ..\src\dist\MonadCode_v1.1.82_x64.msi MonadCode.wxs
 
 if %ERRORLEVEL% NEQ 0 (
     echo MSI build failed.

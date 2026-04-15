@@ -115,7 +115,7 @@ class SchedulerEngine {
     const args = ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', script.path];
     const ps = spawn('powershell.exe', args, {
       windowsHide: true,
-      timeout: (script.timeoutSeconds || 300) * 1000
+      timeout: script.timeoutSeconds ? script.timeoutSeconds * 1000 : 0
     });
 
     let stdout = '';

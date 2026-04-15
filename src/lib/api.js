@@ -8,7 +8,7 @@ const cron = require('node-cron');
 
 const router = express.Router();
 
-const CURRENT_VERSION = '1.1.81';
+const CURRENT_VERSION = '1.1.82';
 const VERSION_CHECK_URL = 'https://monad-code.com/version.json';
 
 // ── Helpers ─────────────────────────────────────────
@@ -373,25 +373,32 @@ router.get('/history/chart', (req, res) => {
   const hoursBack = 42;
   const cutoff = new Date(now.getTime() - hoursBack * 60 * 60 * 1000);
 
-  // Create 42 hourly buckets
+  // Format a Date as local "YYYY-MM-DDTHH:MM" (not UTC)
+  function toLocalHour(d) {
+    const y = d.getFullYear();
+    const mo = String(d.getMonth() + 1).padStart(2, '0');
+    const da = String(d.getDate()).padStart(2, '0');
+    const h = String(d.getHours()).padStart(2, '0');
+    return `${y}-${mo}-${da}T${h}:00`;
+  }
+
+  // Create 42 hourly buckets using local time
   const buckets = [];
   for (let i = hoursBack - 1; i >= 0; i--) {
     const bucketTime = new Date(now.getTime() - i * 60 * 60 * 1000);
-    bucketTime.setMinutes(0, 0, 0);
     buckets.push({
-      hour: bucketTime.toISOString().slice(0, 16),
+      hour: toLocalHour(bucketTime),
       success: 0,
       warning: 0,
       failed: 0
     });
   }
 
-  // Fill buckets from history
+  // Fill buckets from history using local time
   const recentHistory = req.db.history.filter(h => new Date(h.startTime) > cutoff);
   for (const entry of recentHistory) {
     const entryTime = new Date(entry.startTime);
-    entryTime.setMinutes(0, 0, 0);
-    const entryHour = entryTime.toISOString().slice(0, 16);
+    const entryHour = toLocalHour(entryTime);
     const bucket = buckets.find(b => b.hour === entryHour);
     if (!bucket) continue;
 
