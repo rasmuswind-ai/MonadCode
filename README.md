@@ -9,7 +9,7 @@ Lightweight PowerShell script scheduler with a web UI. A minimal alternative to 
 - Define cron-based schedules with enable/disable toggle
 - Run scripts on-demand from the UI
 - View execution history with search and status filtering
-- Dashboard with 24h stats
+- Dashboard with 42h stats
 - Runs as a Windows Service
 - Localhost-only web interface (port 5088)
 
