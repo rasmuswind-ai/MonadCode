@@ -17,26 +17,27 @@ function FolderTreeNode({ entry, depth, selectedPath, onSelect }: FolderTreeNode
   return (
     <div>
       <button
+        type="button"
         onClick={() => {
           onSelect(entry.path);
           if (hasChildren) setExpanded((prev) => !prev);
         }}
-        className={`cursor-pointer w-full flex items-center gap-1.5 py-1 px-2 text-xs transition-all duration-150 rounded-md group ${
+        className={`cursor-pointer w-full flex items-center gap-1.5 py-1 px-2 text-[12px] transition-colors rounded-md ${
           isSelected
-            ? 'bg-white/10 text-stone-200'
-            : 'text-stone-400 hover:bg-white/5 hover:text-stone-300'
+            ? 'bg-ink text-on-ink'
+            : 'text-ink-2 hover:bg-panel-soft hover:text-ink'
         }`}
         style={{ paddingLeft: `${depth * 12 + 8}px` }}
       >
         <ChevronRight
           className={`w-3 h-3 shrink-0 transition-transform duration-200 ${
-            hasChildren ? 'text-stone-500' : 'text-transparent'
+            hasChildren ? '' : 'opacity-0'
           } ${expanded && hasChildren ? 'rotate-90' : ''}`}
         />
         {expanded ? (
-          <FolderOpen className="w-3.5 h-3.5 shrink-0 text-stone-500" />
+          <FolderOpen className="w-3.5 h-3.5 shrink-0" />
         ) : (
-          <Folder className="w-3.5 h-3.5 shrink-0 text-stone-500" />
+          <Folder className="w-3.5 h-3.5 shrink-0" />
         )}
         <span className="truncate font-mono">{entry.name}</span>
       </button>
@@ -70,16 +71,19 @@ export function FolderTree({ tree, selectedPath, rootPath, onSelect }: FolderTre
   return (
     <div className="space-y-0.5">
       <button
+        type="button"
         onClick={() => onSelect(null)}
-        className={`cursor-pointer w-full flex items-center gap-1.5 py-1 px-2 text-xs transition-all duration-150 rounded-md ${
+        className={`cursor-pointer w-full flex items-center gap-1.5 py-1 px-2 text-[12px] transition-colors rounded-md ${
           selectedPath === null
-            ? 'bg-white/10 text-stone-200'
-            : 'text-stone-400 hover:bg-white/5 hover:text-stone-300'
+            ? 'bg-ink text-on-ink'
+            : 'text-ink-2 hover:bg-panel-soft hover:text-ink'
         }`}
       >
-        <FolderOpen className="w-3.5 h-3.5 shrink-0 text-stone-500" />
+        <FolderOpen className="w-3.5 h-3.5 shrink-0" />
         <span className="truncate font-mono font-semibold">{rootName}</span>
-        <span className="ml-auto text-[10px] text-stone-600">All</span>
+        <span className={`ml-auto text-[10px] ${selectedPath === null ? 'text-on-ink/70' : 'text-muted'}`}>
+          All
+        </span>
       </button>
       {tree.map((entry) => (
         <FolderTreeNode

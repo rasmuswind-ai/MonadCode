@@ -24,7 +24,9 @@ export function History() {
   const [showFilterMenu, setShowFilterMenu] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
 
-  const load = () => { api.getHistory(100).then(setHistory); };
+  const load = () => {
+    api.getHistory(100).then(setHistory);
+  };
   useEffect(load, []);
 
   useEffect(() => {
@@ -49,190 +51,99 @@ export function History() {
     const matchesSearch = h.scriptName.toLowerCase().includes(searchInput.toLowerCase());
     const matchesStatus =
       statusFilter === 'all' ||
-      (statusFilter === 'failed' ? (h.status === 'failed' || h.status === 'error') : h.status === statusFilter);
+      (statusFilter === 'failed'
+        ? h.status === 'failed' || h.status === 'error'
+        : h.status === statusFilter);
     return matchesSearch && matchesStatus;
   });
 
+  const successCount = history.filter((h) => h.status === 'success').length;
+  const failCount = history.filter((h) => h.status === 'failed' || h.status === 'error').length;
+
   return (
-    <div className="lg:h-screen relative flex flex-col lg:overflow-hidden overflow-y-auto p-4">
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900">
-        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-white/50 opacity-25 rounded-full blur-[175px] -translate-x-1/3 -translate-y-1/3" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-pink-500 opacity-15 rounded-full blur-[200px] translate-y-1/3" />
+    <div className="flex flex-col gap-5 flex-1 min-h-0">
+      <div className="flex items-center justify-between flex-wrap gap-3 shrink-0">
+        <div>
+          <h1 className="text-[32px] font-bold tracking-[-0.8px] text-ink">History</h1>
+          <p className="text-muted text-[12.5px] mt-0.5">
+            {history.length} execution{history.length === 1 ? '' : 's'} ·{' '}
+            <span className="text-ok-strong">{successCount} successful</span> ·{' '}
+            <span className="text-danger-strong">{failCount} failed</span>
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={load}
+            className="cursor-pointer flex items-center gap-2 px-3.5 py-2 rounded-full border border-line text-ink-2 hover:bg-panel-soft hover:text-ink transition-colors text-[12.5px]"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Refresh</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleClear}
+            disabled={history.length === 0}
+            className="cursor-pointer flex items-center gap-2 px-3.5 py-2 rounded-full border border-line text-danger-strong hover:border-danger hover:bg-danger-soft transition-colors text-[12.5px] disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Clear</span>
+          </button>
+        </div>
       </div>
 
-      <div className="relative flex-1 flex flex-col bg-black/70 border border-white/10 rounded-2xl p-6 shadow-2xl min-h-0 overflow-y-auto custom-scrollbar">
-        <div className="shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="border border-white/10 ml-2 mr-2 py-4" />
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-stone-600 via-stone-400 to-stone-600 bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
-                History
-              </h2>
+      <div className="bg-panel rounded-card shadow-card flex flex-col flex-1 min-h-0 overflow-hidden">
+        <div className="px-6 py-4 border-b border-line flex items-center justify-between gap-3 shrink-0 flex-wrap">
+          <h2 className="text-[15px] font-bold tracking-[-0.2px] text-ink">All Executions</h2>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Search scripts…"
+                className="bg-panel-soft border border-line rounded-full pl-8 pr-3 py-1.5 text-[12.5px] text-ink placeholder-muted focus:outline-none focus:border-ink-2 transition-colors font-mono w-56"
+              />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="relative" ref={filterRef}>
               <button
-                onClick={load}
-                className="cursor-pointer flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/20 text-stone-400 hover:text-stone-300 hover:border-white/20 hover:bg-white/5 transition-all duration-200 text-xs"
+                type="button"
+                onClick={() => setShowFilterMenu((prev) => !prev)}
+                className={`cursor-pointer w-8 h-8 rounded-full border grid place-items-center transition-colors ${
+                  statusFilter !== 'all'
+                    ? 'border-ink bg-ink text-on-ink'
+                    : 'border-line text-ink-2 hover:bg-panel-soft'
+                }`}
+                title="Filter by status"
               >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Refresh</span>
+                <Filter className="w-3.5 h-3.5" />
               </button>
-              <button
-                onClick={handleClear}
-                disabled={history.length === 0}
-                className="cursor-pointer flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/10 text-red-400 hover:border-red-500/30 hover:bg-red-500/10 transition-all duration-200 text-xs disabled:opacity-30 disabled:cursor-not-allowed"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Clear</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-6 flex flex-col lg:flex-row gap-4 shrink-0">
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-2 shadow-2xl shrink-0">
-            <div className="flex items-center gap-3 whitespace-nowrap">
-              <HistoryIcon className="w-4 h-4 ml-2 text-stone-600" />
-              <p className="text-stone-400 text-sm">Total executions:</p>
-              <p className="mr-2 text-md font-bold text-gray-300">{history.length}</p>
-            </div>
-          </div>
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-2 shadow-2xl shrink-0">
-            <div className="flex items-center gap-3 whitespace-nowrap">
-              <HistoryIcon className="w-4 h-4 ml-2 text-stone-600" />
-              <p className="text-stone-400 text-sm">Successful:</p>
-              <p className="mr-2 text-md font-bold text-green-400">{history.filter(h => h.status === 'success').length}</p>
-            </div>
-          </div>
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-2 shadow-2xl shrink-0">
-            <div className="flex items-center gap-3 whitespace-nowrap">
-              <HistoryIcon className="w-4 h-4 ml-2 text-stone-600" />
-              <p className="text-stone-400 text-sm">Failed:</p>
-              <p className="mr-2 text-md font-bold text-red-400">{history.filter(h => h.status === 'failed' || h.status === 'error').length}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-6 flex-1 min-h-0">
-          <div className="bg-white/5 border border-white/10 backdrop-blur rounded-lg overflow-hidden flex flex-col h-full">
-            <div className="shrink-0">
-              <div className="flex items-center justify-between px-4 pt-3">
-                <div className="ml-1">
-                  <h2 className="text-stone-500">All Executions</h2>
-                  <div className="mt-2 border border-white/10 px-1 rounded-lg" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="relative">
-                    <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-stone-500" />
-                    <input
-                      type="text"
-                      value={searchInput}
-                      onChange={(e) => setSearchInput(e.target.value)}
-                      placeholder="Search scripts..."
-                      className="bg-black/40 border border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-xs text-stone-300 placeholder-stone-600 focus:outline-none focus:border-stone-500/50 transition-colors font-mono w-48"
-                    />
-                  </div>
-                  <div className="relative" ref={filterRef}>
+              {showFilterMenu && (
+                <div className="absolute right-0 top-full mt-1 z-50 bg-panel border border-line rounded-card-sm overflow-hidden shadow-card min-w-[140px]">
+                  {(
+                    [
+                      { value: 'all', label: 'All' },
+                      { value: 'success', label: 'Success' },
+                      { value: 'failed', label: 'Failed' },
+                      { value: 'running', label: 'Running' },
+                    ] as { value: StatusFilter; label: string }[]
+                  ).map((option) => (
                     <button
-                      onClick={() => setShowFilterMenu((prev) => !prev)}
-                      className={`cursor-pointer p-1.5 rounded-lg border transition-all duration-200 ${
-                        statusFilter !== 'all'
-                          ? 'border-stone-500/50 bg-white/10 text-stone-300'
-                          : 'border-white/10 text-stone-600 hover:text-stone-400 hover:border-white/20'
+                      key={option.value}
+                      type="button"
+                      onClick={() => {
+                        setStatusFilter(option.value);
+                        setShowFilterMenu(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 text-[12px] transition-colors cursor-pointer ${
+                        statusFilter === option.value
+                          ? 'text-ink bg-panel-soft font-medium'
+                          : 'text-ink-2 hover:text-ink hover:bg-panel-soft'
                       }`}
-                      title="Filter by status"
                     >
-                      <Filter className="w-3.5 h-3.5" />
+                      {option.label}
                     </button>
-                    {showFilterMenu && (
-                      <div className="absolute right-0 top-full mt-1 z-50 bg-[#1c1c1c] border border-white/10 rounded-lg overflow-hidden shadow-xl min-w-[120px]">
-                        {([
-                          { value: 'all', label: 'All' },
-                          { value: 'success', label: 'Success' },
-                          { value: 'failed', label: 'Failed' },
-                          { value: 'running', label: 'Running' },
-                        ] as { value: StatusFilter; label: string }[]).map((option) => (
-                          <button
-                            key={option.value}
-                            onClick={() => {
-                              setStatusFilter(option.value);
-                              setShowFilterMenu(false);
-                            }}
-                            className={`w-full text-left px-3 py-1.5 text-xs transition-colors cursor-pointer ${
-                              statusFilter === option.value
-                                ? 'text-stone-200 bg-white/10'
-                                : 'text-stone-500 hover:text-stone-300 hover:bg-white/5'
-                            }`}
-                          >
-                            {option.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto custom-scrollbar min-h-0">
-              {history.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 gap-2">
-                  <HistoryIcon className="w-5 h-5 text-stone-700" />
-                  <p className="text-stone-600 text-xs">No execution history yet.</p>
-                </div>
-              ) : filteredHistory.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 gap-2">
-                  <Search className="w-5 h-5 text-stone-700" />
-                  <p className="text-stone-600 text-xs">No matching executions found.</p>
-                </div>
-              ) : (
-                <div className="p-4">
-                  {filteredHistory.map((h) => (
-                    <div key={h.id}>
-                      <div className="flex items-center justify-between py-2">
-                        <div className="flex items-center gap-3">
-                          <StatusBadge status={h.status} />
-                          <div>
-                            <p className="text-sm font-semibold text-stone-300">
-                              {h.scriptName}
-                            </p>
-                            <p className="font-bold text-xs text-stone-500">
-                              {h.triggeredBy === 'manual' ? 'Manual' : 'Scheduled'}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="border border-white/10 py-3 rounded-lg" />
-                          <div className="ml-4 mr-4 text-xs flex items-center border border-white/10 backdrop-blur rounded-lg p-1 bg-black/40">
-                            <div className="flex items-center gap-2 ml-2 mr-2">
-                              <Clock className="w-3 h-3 text-stone-600" />
-                              <span className="text-xs font-mono text-stone-400">
-                                {new Date(h.startTime).toLocaleString()}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="mr-4 text-xs flex items-center border border-white/10 backdrop-blur rounded-lg p-1 bg-black/40">
-                            <div className="flex items-center gap-2 ml-2 mr-2">
-                              <Hourglass className="w-3 h-3 text-stone-600" />
-                              <span className="text-xs font-mono text-stone-400">
-                                {h.endTime
-                                  ? `${((new Date(h.endTime).getTime() - new Date(h.startTime).getTime()) / 1000).toFixed(1)}s`
-                                  : '...'}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="border border-white/10 py-3 rounded-lg" />
-                          <button
-                            onClick={() => setSelected(h)}
-                            className="ml-3 cursor-pointer p-1 rounded-lg border border-white/10 text-stone-500 hover:text-stone-300 hover:border-white/20 hover:bg-white/5 transition-all duration-200"
-                            title="View output"
-                          >
-                            <Terminal className="w-4 h-4"/>
-                          </button>
-                        </div>
-                      </div>
-                      <div className="border border-white/5" />
-                    </div>
                   ))}
                 </div>
               )}
@@ -240,39 +151,106 @@ export function History() {
           </div>
         </div>
 
-        {selected && (
-          <Modal title={`${selected.scriptName} - ${selected.status}`} onClose={() => setSelected(null)}>
-            <div className="mb-3 flex items-center gap-2">
-              <StatusBadge status={selected.status} />
-              {selected.exitCode !== undefined && (
-                <span className="text-xs font-mono text-stone-500 ml-2">Exit code: {selected.exitCode}</span>
-              )}
+        <div className="flex-1 overflow-y-auto min-h-0">
+          {history.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 gap-3">
+              <HistoryIcon className="w-6 h-6 text-muted" />
+              <p className="text-muted text-[13px]">No execution history yet.</p>
             </div>
+          ) : filteredHistory.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 gap-3">
+              <Search className="w-6 h-6 text-muted" />
+              <p className="text-muted text-[13px]">No matching executions found.</p>
+            </div>
+          ) : (
+            <div>
+              {filteredHistory.map((h) => (
+                <div
+                  key={h.id}
+                  className="grid grid-cols-12 gap-3 px-6 py-4 items-center border-b border-line last:border-0 hover:bg-panel-soft transition-colors"
+                >
+                  <div className="col-span-1 flex items-center">
+                    <StatusBadge status={h.status} />
+                  </div>
 
-            {selected.output && (
-              <>
-                <label className="text-xs font-semibold text-stone-500">Output</label>
-                <pre className="mt-1 bg-white/5 border border-white/10 rounded-lg p-3 font-mono text-xs whitespace-pre-wrap break-all max-h-[400px] overflow-y-auto text-stone-400 custom-scrollbar">
-                  {selected.output}
-                </pre>
-              </>
-            )}
+                  <div className="col-span-4 min-w-0">
+                    <p className="text-[13.5px] font-semibold text-ink truncate">{h.scriptName}</p>
+                    <p className="text-[11.5px] text-muted">
+                      {h.triggeredBy === 'manual' ? 'Manual' : 'Scheduled'}
+                    </p>
+                  </div>
 
-            {selected.error && (
-              <div className="mt-3">
-                <label className="text-xs font-semibold text-red-400">Errors</label>
-                <pre className="mt-1 bg-red-500/5 border border-red-500/20 rounded-lg p-3 font-mono text-xs whitespace-pre-wrap break-all max-h-[400px] overflow-y-auto text-stone-400 custom-scrollbar">
-                  {selected.error}
-                </pre>
-              </div>
-            )}
+                  <div className="col-span-3">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-pill text-ink-2 text-[11px] font-medium font-mono">
+                      <Clock className="w-3 h-3" />
+                      {new Date(h.startTime).toLocaleString()}
+                    </span>
+                  </div>
 
-            {!selected.output && !selected.error && (
-              <div className="text-stone-600 text-xs font-mono">No output captured.</div>
-            )}
-          </Modal>
-        )}
+                  <div className="col-span-2">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-pill text-ink-2 text-[11px] font-medium font-mono">
+                      <Hourglass className="w-3 h-3" />
+                      {h.endTime
+                        ? `${((new Date(h.endTime).getTime() - new Date(h.startTime).getTime()) / 1000).toFixed(1)}s`
+                        : '…'}
+                    </span>
+                  </div>
+
+                  <div className="col-span-2 flex items-center justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setSelected(h)}
+                      className="cursor-pointer w-8 h-8 rounded-full border border-line text-ink-2 grid place-items-center hover:bg-panel-soft hover:text-ink transition-colors"
+                      title="View output"
+                    >
+                      <Terminal className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
+
+      {selected && (
+        <Modal title={`${selected.scriptName} — ${selected.status}`} onClose={() => setSelected(null)}>
+          <div className="mb-3 flex items-center gap-2">
+            <StatusBadge status={selected.status} />
+            {selected.exitCode !== undefined && (
+              <span className="text-[11.5px] font-mono text-muted">
+                Exit code: {selected.exitCode}
+              </span>
+            )}
+          </div>
+
+          {selected.output && (
+            <>
+              <label className="text-[11px] font-semibold text-muted uppercase tracking-[0.6px]">
+                Output
+              </label>
+              <pre className="mt-1 bg-panel-soft border border-line rounded-card-sm p-3 font-mono text-[12px] whitespace-pre-wrap break-all max-h-[400px] overflow-y-auto text-ink-2">
+                {selected.output}
+              </pre>
+            </>
+          )}
+
+          {selected.error && (
+            <div className="mt-3">
+              <label className="text-[11px] font-semibold text-danger-strong uppercase tracking-[0.6px]">
+                Errors
+              </label>
+              <pre className="mt-1 bg-danger-soft border border-danger/40 rounded-card-sm p-3 font-mono text-[12px] whitespace-pre-wrap break-all max-h-[400px] overflow-y-auto text-ink-2">
+                {selected.error}
+              </pre>
+            </div>
+          )}
+
+          {!selected.output && !selected.error && (
+            <div className="text-muted text-[12px] font-mono">No output captured.</div>
+          )}
+        </Modal>
+      )}
     </div>
   );
 }

@@ -1,9 +1,19 @@
 const cron = require('node-cron');
 const { spawn } = require('child_process');
-const path = require('path');
+const fs = require('fs');
 const { saveDb } = require('./db');
+const secrets = require('./secrets');
 
-const MAX_HISTORY = 500;
+const DEFAULT_MAX_HISTORY = 500;
+const MAX_HISTORY_CAP = 5000;
+// Case-insensitive: PowerShell variable names are case-insensitive, so
+// $secret.Foo, $SECRET.foo, $Secret.foo all refer to the same thing.
+const SECRET_REF_RE = /\$Secret\.([A-Za-z_][A-Za-z0-9_]*)/gi;
+
+// Escape a string for PowerShell single-quoted literals: double any apostrophe.
+function psQuote(s) {
+  return "'" + String(s).replace(/'/g, "''") + "'";
+}
 
 class SchedulerEngine {
   constructor(db) {
@@ -112,10 +122,51 @@ class SchedulerEngine {
     this._trimHistory();
     saveDb(this.db);
 
-    const args = ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', script.path];
+    // Fire-and-forget the async spawn; failures are recorded to history below.
+    this._runWithSecrets(script, historyEntry).catch((err) => {
+      const entry = this.db.history.find(h => h.id === historyEntry.id);
+      if (entry && entry.status === 'running') {
+        entry.endTime = new Date().toISOString();
+        entry.error = err.message;
+        entry.status = 'error';
+        saveDb(this.db);
+      }
+    });
+
+    return historyEntry;
+  }
+
+  async _runWithSecrets(script, historyEntry) {
+    // Read script content to discover which secrets it references. If this
+    // fails, bail out with an "error" status so PowerShell's own file-not-found
+    // path isn't reached — we want a clear message in history.
+    const content = await fs.promises.readFile(script.path, 'utf8');
+
+    const referenced = new Set();
+    for (const m of content.matchAll(SECRET_REF_RE)) {
+      referenced.add(m[1]);
+    }
+
+    const resolved = referenced.size > 0
+      ? await secrets.resolveMany([...referenced])
+      : new Map();
+
+    // Build $Secret hashtable and dot-source the user's script so $PSScriptRoot
+    // and relative imports continue to work. Values are single-quoted with
+    // apostrophes doubled, matching PS literal-string escaping rules.
+    //
+    // NOTE: the hashtable MUST be on a single line. PowerShell's stdin
+    // ("-Command -") parser silently drops output when it sees multi-line
+    // hashtable bodies — it treats them as incomplete expressions.
+    const entries = [...resolved].map(([name, value]) => `${name} = ${psQuote(value)}`);
+    const header = `$Secret = @{ ${entries.join('; ')} }`;
+    const combined = `${header}\n. ${psQuote(script.path)}\n`;
+
+    const args = ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', '-'];
     const ps = spawn('powershell.exe', args, {
       windowsHide: true,
-      timeout: script.timeoutSeconds ? script.timeoutSeconds * 1000 : 0
+      timeout: script.timeoutSeconds ? script.timeoutSeconds * 1000 : 0,
+      stdio: ['pipe', 'pipe', 'pipe'],
     });
 
     let stdout = '';
@@ -146,12 +197,17 @@ class SchedulerEngine {
       saveDb(this.db);
     });
 
-    return historyEntry;
+    ps.stdin.write(combined);
+    ps.stdin.end();
   }
 
   _trimHistory() {
-    if (this.db.history.length > MAX_HISTORY) {
-      this.db.history = this.db.history.slice(0, MAX_HISTORY);
+    const settings = this.db.settings || {};
+    const raw = Number(settings.historyRetention);
+    const configured = Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_MAX_HISTORY;
+    const cap = Math.min(configured, MAX_HISTORY_CAP);
+    if (this.db.history.length > cap) {
+      this.db.history = this.db.history.slice(0, cap);
     }
   }
 }

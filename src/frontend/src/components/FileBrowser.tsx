@@ -3,8 +3,8 @@ import { Folder, FileCode, ArrowUp, Home, HardDrive } from 'lucide-react';
 import { api } from '../api';
 import type { BrowseEntry } from '../types';
 
-const btnQuick =
-  'cursor-pointer px-2.5 py-1 text-[11px] rounded bg-stone-900 border border-stone-800 text-stone-400 tracking-wider hover:bg-stone-800 hover:text-stone-300 transition-colors flex items-center gap-1.5';
+const quickBtn =
+  'cursor-pointer flex items-center gap-1.5 px-2.5 py-1 text-[11px] rounded-full border border-line bg-panel text-ink-2 hover:bg-panel-soft hover:text-ink transition-colors';
 
 interface FileBrowserProps {
   onSelect: (filePath: string) => void;
@@ -26,57 +26,57 @@ export function FileBrowser({ onSelect, onClose, initialPath }: FileBrowserProps
     setLoading(true);
     setError('');
 
-    api.browse(currentPath || undefined).then((result) => {
-      if (cancelled) return;
-      setCurrentPath(result.current);
-      setParent(result.parent);
-      setDirectories(result.directories);
-      setFiles(result.files);
-      setQuickAccess(result.quickAccess);
-      setLoading(false);
-    }).catch((err) => {
-      if (cancelled) return;
-      setError(err.message);
-      setLoading(false);
-    });
+    api
+      .browse(currentPath || undefined)
+      .then((result) => {
+        if (cancelled) return;
+        setCurrentPath(result.current);
+        setParent(result.parent);
+        setDirectories(result.directories);
+        setFiles(result.files);
+        setQuickAccess(result.quickAccess);
+        setLoading(false);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setError(err.message);
+        setLoading(false);
+      });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [currentPath]);
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex items-center gap-2 mb-3 flex-wrap">
         {quickAccess.map((qa) => (
-          <button
-            key={qa.path}
-            type="button"
-            className={btnQuick}
-            onClick={() => setCurrentPath(qa.path)}
-          >
+          <button key={qa.path} type="button" className={quickBtn} onClick={() => setCurrentPath(qa.path)}>
             {qa.name === 'Home' ? <Home className="w-3 h-3" /> : <HardDrive className="w-3 h-3" />}
             {qa.name}
           </button>
         ))}
       </div>
 
-      <div className="px-3 py-2 rounded-md border border-border bg-bg font-mono text-xs text-dim break-all mb-3">
+      <div className="px-3 py-2 rounded-card-sm border border-line bg-panel-soft font-mono text-[12px] text-ink-2 break-all mb-3">
         {currentPath || '...'}
       </div>
 
-      {error && <div className="text-danger text-sm mb-3">{error}</div>}
+      {error && <div className="text-danger-strong text-[12px] mb-3">{error}</div>}
 
-      <div className="border border-stone-800 rounded-lg bg-stone-900 max-h-[400px] overflow-y-auto">
+      <div className="border border-line rounded-card-sm bg-panel max-h-[400px] overflow-y-auto">
         {loading ? (
-          <div className="text-center py-8 text-dim text-sm">Loading...</div>
+          <div className="text-center py-8 text-muted text-[12px]">Loading…</div>
         ) : (
           <div>
             {parent && (
               <button
                 type="button"
-                className="flex items-center gap-2.5 w-full px-3 py-2.5 text-sm text-stone-400 hover:bg-white/[0.08] transition-colors cursor-pointer border-b border-border"
+                className="cursor-pointer flex items-center gap-2.5 w-full px-3 py-2.5 text-[12px] text-ink-2 hover:bg-panel-soft transition-colors border-b border-line"
                 onClick={() => setCurrentPath(parent)}
               >
-                <ArrowUp className="w-4 h-4 text-stone-500" />
+                <ArrowUp className="w-4 h-4 text-muted" />
                 <span>..</span>
               </button>
             )}
@@ -85,10 +85,10 @@ export function FileBrowser({ onSelect, onClose, initialPath }: FileBrowserProps
               <button
                 key={dir.path}
                 type="button"
-                className="flex items-center gap-2.5 w-full px-3 py-2.5 text-sm text-text hover:bg-white/[0.08] transition-colors cursor-pointer border-b border-border"
+                className="cursor-pointer flex items-center gap-2.5 w-full px-3 py-2.5 text-[12px] text-ink hover:bg-panel-soft transition-colors border-b border-line font-mono"
                 onClick={() => setCurrentPath(dir.path)}
               >
-                <Folder className="w-4 h-4 text-stone-500 shrink-0" />
+                <Folder className="w-4 h-4 text-muted shrink-0" />
                 <span className="truncate">{dir.name}</span>
               </button>
             ))}
@@ -97,17 +97,17 @@ export function FileBrowser({ onSelect, onClose, initialPath }: FileBrowserProps
               <button
                 key={file.path}
                 type="button"
-                className="flex items-center gap-2.5 w-full px-3 py-2.5 text-sm text-text hover:bg-primary/[0.08] transition-colors cursor-pointer border-b border-border group"
+                className="cursor-pointer flex items-center gap-2.5 w-full px-3 py-2.5 text-[12px] text-ink hover:bg-panel-soft transition-colors border-b border-line font-mono group"
                 onClick={() => onSelect(file.path)}
               >
-                <FileCode className="w-4 h-4 text-stone-500 shrink-0 group-hover:text-primary" />
+                <FileCode className="w-4 h-4 text-muted shrink-0 group-hover:text-ink" />
                 <span className="truncate">{file.name}</span>
-                <span className="ml-auto text-[11px] text-stone-600 group-hover:text-primary shrink-0">Select</span>
+                <span className="ml-auto text-[11px] text-muted group-hover:text-ink shrink-0">Select</span>
               </button>
             ))}
 
             {!loading && directories.length === 0 && files.length === 0 && (
-              <div className="text-center py-8 text-dim text-sm">
+              <div className="text-center py-8 text-muted text-[12px]">
                 No folders or .ps1 files in this directory.
               </div>
             )}
@@ -116,11 +116,7 @@ export function FileBrowser({ onSelect, onClose, initialPath }: FileBrowserProps
       </div>
 
       <div className="mt-4 flex justify-end">
-        <button
-          type="button"
-          className={btnQuick}
-          onClick={onClose}
-        >
+        <button type="button" className={quickBtn} onClick={onClose}>
           Cancel
         </button>
       </div>

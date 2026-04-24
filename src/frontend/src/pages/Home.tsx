@@ -5,9 +5,9 @@ import { api } from '../api';
 import type { ChartDataPoint } from '../types';
 
 const lines = [
-  { key: 'failed' as const, label: 'Failures', color: '#ef4444', gradientColor: '#dc2626' },
-  { key: 'warning' as const, label: 'Warnings', color: '#eab308', gradientColor: '#ca8a04' },
-  { key: 'success' as const, label: 'Successes', color: '#22c55e', gradientColor: '#16a34a' },
+  { key: 'failed' as const,  label: 'Failures',  color: '#ff6b7e' },
+  { key: 'warning' as const, label: 'Warnings',  color: '#e0a94b' },
+  { key: 'success' as const, label: 'Successes', color: '#4dd39a' },
 ];
 
 export function Home() {
@@ -48,167 +48,184 @@ export function Home() {
   }, [chartData]);
 
   const panels = [
-    { label: 'Total Runs (42h)', value: totals.runs, color: '#a78bfa', icon: Activity },
-    { label: 'Successes (42h)', value: totals.success, color: '#22c55e', icon: CheckCircle },
-    { label: 'Warnings (42h)', value: totals.warning, color: '#eab308', icon: AlertTriangle },
-    { label: 'Failures (42h)', value: totals.failed, color: '#ef4444', icon: XCircle },
+    { label: 'Total Runs (42h)', value: totals.runs,    icon: Activity,       tone: 'default' as const },
+    { label: 'Successes (42h)',  value: totals.success, icon: CheckCircle,    tone: 'ok' as const },
+    { label: 'Warnings (42h)',   value: totals.warning, icon: AlertTriangle,  tone: 'warn' as const },
+    { label: 'Failures (42h)',   value: totals.failed,  icon: XCircle,        tone: 'danger' as const },
   ];
 
   const toggleLine = (key: 'success' | 'warning' | 'failed') => {
-    setVisibleLines(prev => ({ ...prev, [key]: !prev[key] }));
+    setVisibleLines((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const pillFor = (tone: 'default' | 'ok' | 'warn' | 'danger') => {
+    switch (tone) {
+      case 'ok':
+        return 'bg-ok-soft text-ok-strong';
+      case 'warn':
+        return 'bg-warn-soft text-warn';
+      case 'danger':
+        return 'bg-danger-soft text-danger-strong';
+      default:
+        return 'bg-pill text-ink-2';
+    }
   };
 
   return (
-    <div className="h-screen relative overflow-hidden flex flex-col p-4">
-      {/* Background gradient blobs */}
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900">
-        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-white/50 opacity-25 rounded-full blur-[175px] -translate-x-1/3 -translate-y-1/3" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-pink-500 opacity-15 rounded-full blur-[200px] translate-y-1/3" />
+    <div className="flex flex-col gap-5 flex-1 min-h-0">
+      {/* Stat panels */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
+        {panels.map((panel) => {
+          const Icon = panel.icon;
+          return (
+            <div
+              key={panel.label}
+              className="bg-panel rounded-card shadow-card px-6 py-5 transition-transform hover:-translate-y-0.5"
+            >
+              <div className="flex justify-between items-center">
+                <span className="text-muted text-[12.5px] font-medium">{panel.label}</span>
+                <span
+                  className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium ${pillFor(
+                    panel.tone
+                  )}`}
+                >
+                  live
+                </span>
+              </div>
+              <div className="text-[34px] font-bold tracking-[-1px] mt-3.5 mb-1.5 text-ink tabular-nums">
+                {isLoading ? '—' : panel.value.toLocaleString()}
+              </div>
+              <div className="flex items-center gap-1.5 text-[12px] text-ink-2">
+                <Icon className="w-3 h-3" />
+                <span>executions</span>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Main glassmorphism container */}
-      <div className="relative flex-1 flex flex-col bg-black/50 border border-white/10 rounded-2xl p-6 shadow-2xl min-h-0">
-        <div className="flex-1 flex flex-col min-h-0">
-
-          {/* Stat panels */}
-          <div className="flex flex-col md:flex-row gap-4 shrink-0">
-            {panels.map((panel) => (
-              <div
-                key={panel.label}
-                className="flex-1 bg-white/5 border border-white/10 rounded-lg p-4 shadow-2xl hover:bg-white/[0.08] transition-colors"
-              >
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: panel.color }} />
-                  <h1 className="text-md font-semibold bg-gradient-to-r from-stone-500 via-stone-300 to-stone-500 bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
-                    {panel.label}
-                  </h1>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  <div className="bg-white/5 border border-white/10 rounded-xl p-2 shrink-0">
-                    <div className="flex items-center gap-2 whitespace-nowrap">
-                      <panel.icon className="w-3 h-3 text-stone-600" />
-                      <p className="text-stone-400 text-xs">Count:</p>
-                      <span
-                        className="text-xs font-semibold inline-block bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]"
-                        style={{
-                          backgroundImage: `linear-gradient(to right, ${panel.color}, ${panel.color}dd, ${panel.color})`,
-                        }}
-                      >
-                        {isLoading ? '...' : panel.value.toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+      {/* Chart card */}
+      <div className="bg-panel rounded-card shadow-card p-6 flex flex-col flex-1 min-h-[420px]">
+        <div className="flex justify-between items-start mb-4 flex-wrap gap-3">
+          <div>
+            <h2 className="text-[17px] font-bold tracking-[-0.3px] text-ink">Activity</h2>
+            <p className="text-muted text-[12.5px] mt-0.5">Executions across the last 42 hours</p>
           </div>
-
-          {/* Toggle buttons */}
-          <div className="flex items-center gap-3 mt-5 shrink-0">
+          <div className="flex items-center gap-2">
             {lines.map((line) => (
               <button
                 key={line.key}
+                type="button"
                 onClick={() => toggleLine(line.key)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs transition-all duration-200 cursor-pointer ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] border transition-colors cursor-pointer ${
                   visibleLines[line.key]
-                    ? 'border-white/15 bg-white/[0.08] text-stone-300'
-                    : 'border-white/5 bg-transparent text-stone-600'
+                    ? 'border-line bg-panel text-ink-2'
+                    : 'border-line bg-panel-soft text-muted'
                 }`}
               >
-                <div
-                  className={`w-2 h-2 rounded-full transition-opacity ${
-                    visibleLines[line.key] ? 'opacity-100' : 'opacity-30'
-                  }`}
-                  style={{ backgroundColor: line.color }}
+                <span
+                  className="w-2 h-2 rounded-full"
+                  style={{ backgroundColor: visibleLines[line.key] ? line.color : '#d7dae0' }}
                 />
                 {line.label}
               </button>
             ))}
           </div>
+        </div>
 
-          {/* Chart */}
-          <div ref={chartContainerRef} className="flex-1 flex flex-col mt-4 min-h-0">
-            {isLoading ? (
-              <p className="text-gray-400 mt-28 text-center">Loading...</p>
-            ) : (
-              <div className="flex-1 min-h-0 p-4 -ml-6">
-                {chartDimensions.width > 0 && chartDimensions.height > 0 && (
-                  <AreaChart
-                    width={chartDimensions.width}
-                    height={chartDimensions.height}
-                    data={chartData}
-                    stackOffset="none"
-                  >
-                    <CartesianGrid
-                      strokeDasharray=""
-                      stroke="rgba(255,255,255,0.05)"
-                      horizontalCoordinatesGenerator={({ height }) => {
-                        const step = 60;
-                        const result = [];
-                        for (let i = step; i < height; i += step) result.push(i);
-                        return result;
-                      }}
-                      verticalCoordinatesGenerator={({ width }) => {
-                        const step = 60;
-                        const result = [];
-                        for (let i = step; i < width; i += step) result.push(i);
-                        return result;
-                      }}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: 'rgba(0,0,0,0.8)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px',
-                        fontSize: '12px',
-                      }}
-                      itemStyle={{ color: '#a8a29e' }}
-                      labelStyle={{ color: '#78716c' }}
-                      labelFormatter={(_, payload) => {
-                        if (payload && payload.length > 0) {
-                          const hour = (payload[0].payload as ChartDataPoint).hour;
-                          const d = new Date(hour);
-                          return d.toLocaleString(undefined, {
-                            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                          });
-                        }
-                        return '';
-                      }}
-                    />
-                    <defs>
-                      {lines.map((line) => (
-                        <linearGradient key={line.key} id={`gradient-${line.key}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor={line.gradientColor} stopOpacity={0.4} />
-                          <stop offset="100%" stopColor={line.gradientColor} stopOpacity={0.05} />
-                        </linearGradient>
-                      ))}
-                    </defs>
-                    {lines.map((line) => (
-                      <Area
-                        key={line.key}
-                        type="monotone"
-                        dataKey={line.key}
-                        name={line.label}
-                        stroke={visibleLines[line.key] ? line.color : 'transparent'}
-                        strokeWidth={2.5}
-                        fill={visibleLines[line.key] ? `url(#gradient-${line.key})` : 'transparent'}
-                        dot={false}
-                        connectNulls
-                      />
-                    ))}
-                    <YAxis
-                      tick={{ fill: '#78716c', fontSize: 11 }}
-                      axisLine={{ stroke: 'rgba(255,255,255,0.05)' }}
-                      tickLine={false}
-                      allowDecimals={false}
-                      domain={[0, (max: number) => Math.max(max, 5)]}
-                      width={40}
-                    />
-                  </AreaChart>
-                )}
-              </div>
-            )}
-          </div>
+        <div ref={chartContainerRef} className="flex-1 min-h-0 -ml-2">
+          {isLoading ? (
+            <p className="text-muted mt-28 text-center text-[13px]">Loading…</p>
+          ) : (
+            chartDimensions.width > 0 &&
+            chartDimensions.height > 0 && (
+              <AreaChart
+                width={chartDimensions.width}
+                height={chartDimensions.height}
+                data={chartData}
+                stackOffset="none"
+              >
+                <CartesianGrid
+                  strokeDasharray=""
+                  stroke="var(--chart-grid)"
+                  horizontalCoordinatesGenerator={({ height }) => {
+                    const step = 60;
+                    const result: number[] = [];
+                    for (let i = step; i < height; i += step) result.push(i);
+                    return result;
+                  }}
+                  verticalCoordinatesGenerator={({ width }) => {
+                    const step = 60;
+                    const result: number[] = [];
+                    for (let i = step; i < width; i += step) result.push(i);
+                    return result;
+                  }}
+                />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'var(--panel)',
+                    border: '1px solid var(--line)',
+                    borderRadius: '14px',
+                    boxShadow: 'var(--shadow-card)',
+                    fontSize: '12px',
+                    color: 'var(--ink)',
+                  }}
+                  itemStyle={{ color: 'var(--ink-2)' }}
+                  labelStyle={{ color: 'var(--muted)', marginBottom: 4 }}
+                  cursor={{ stroke: 'var(--chart-axis)', strokeWidth: 1 }}
+                  labelFormatter={(_, payload) => {
+                    if (payload && payload.length > 0) {
+                      const hour = (payload[0].payload as ChartDataPoint).hour;
+                      const d = new Date(hour);
+                      return d.toLocaleString(undefined, {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      });
+                    }
+                    return '';
+                  }}
+                />
+                <defs>
+                  {lines.map((line) => (
+                    <linearGradient
+                      key={line.key}
+                      id={`gradient-${line.key}`}
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="0%" stopColor={line.color} stopOpacity={0.35} />
+                      <stop offset="100%" stopColor={line.color} stopOpacity={0} />
+                    </linearGradient>
+                  ))}
+                </defs>
+                {lines.map((line) => (
+                  <Area
+                    key={line.key}
+                    type="monotone"
+                    dataKey={line.key}
+                    name={line.label}
+                    stroke={visibleLines[line.key] ? line.color : 'transparent'}
+                    strokeWidth={2.5}
+                    fill={visibleLines[line.key] ? `url(#gradient-${line.key})` : 'transparent'}
+                    dot={false}
+                    connectNulls
+                  />
+                ))}
+                <YAxis
+                  tick={{ fill: 'var(--muted)', fontSize: 11 }}
+                  axisLine={{ stroke: 'var(--chart-axis)' }}
+                  tickLine={false}
+                  allowDecimals={false}
+                  domain={[0, (max: number) => Math.max(max, 5)]}
+                  width={40}
+                />
+              </AreaChart>
+            )
+          )}
         </div>
       </div>
     </div>

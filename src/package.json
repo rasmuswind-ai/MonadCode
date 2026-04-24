@@ -1,6 +1,6 @@
 {
   "name": "monadcode",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Lightweight PowerShell script scheduler with web UI",
   "main": "server.js",
   "bin": "cli.js",
@@ -8,8 +8,9 @@
     "start": "node server.js",
     "install-service": "node service-install.js",
     "uninstall-service": "node service-uninstall.js",
-    "build:exe": "pkg . --target node18-win-x64 --output dist/monadcode.exe && node -e \"fs=require('fs');fs.copyFileSync('node_modules/node-windows/bin/winsw/winsw.exe','dist/winsw.exe');fs.copyFileSync('node_modules/node-windows/bin/winsw/winsw.exe.config','dist/winsw.exe.config')\" && echo winsw.exe copied to dist/",
-    "build:msi": "cd .. && installer\\build-msi.bat"
+    "sync-version": "node scripts/sync-version.js",
+    "build:exe": "node scripts/sync-version.js && pkg . --target node18-win-x64 --output dist/monadcode.exe && node -e \"fs=require('fs');fs.copyFileSync('node_modules/node-windows/bin/winsw/winsw.exe','dist/winsw.exe');fs.copyFileSync('node_modules/node-windows/bin/winsw/winsw.exe.config','dist/winsw.exe.config')\" && echo winsw.exe copied to dist/",
+    "build:msi": "node scripts/sync-version.js && cd .. && installer\\build-msi.bat"
   },
   "pkg": {
     "assets": [

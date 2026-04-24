@@ -1,5 +1,8 @@
 const express = require('express');
 const path = require('path');
+const logs = require('./lib/logs');
+// Install the console patch BEFORE any other module that might log on load.
+logs.install();
 const { loadDb, saveDb } = require('./lib/db');
 const { SchedulerEngine } = require('./lib/scheduler');
 const apiRoutes = require('./lib/api');

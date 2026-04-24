@@ -61,6 +61,26 @@ export interface BrowseResult {
 
 export interface Settings {
   scriptsFolder?: string;
+  historyRetention?: number;
+  defaultTimeoutSeconds?: number;
+  autoUpdateCheck?: boolean;
+}
+
+export interface LogEntry {
+  id: number;
+  timestamp: string;
+  level: 'info' | 'warn' | 'error';
+  message: string;
+}
+
+export interface LogsResponse {
+  entries: LogEntry[];
+  cursor: number;
+}
+
+export interface SecretEntry {
+  name: string;
+  createdAt: string;
 }
 
 export interface TreeEntry {

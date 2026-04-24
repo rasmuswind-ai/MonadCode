@@ -37,4 +37,9 @@ function getDbPath() {
   return path.join(getDataDir(), 'monadcode.json');
 }
 
-module.exports = { isPkg, getExeDir, getExePath, getWwwrootPath, getDataDir, getDbPath };
+// Full path to the encrypted secrets store
+function getSecretsPath() {
+  return path.join(getDataDir(), 'secrets.json');
+}
+
+module.exports = { isPkg, getExeDir, getExePath, getWwwrootPath, getDataDir, getDbPath, getSecretsPath };

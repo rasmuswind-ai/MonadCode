@@ -5,10 +5,16 @@ const os = require('os');
 const { v4: uuidv4 } = require('uuid');
 const { saveDb } = require('./db');
 const cron = require('node-cron');
+const secrets = require('./secrets');
+const logs = require('./logs');
 
 const router = express.Router();
 
-const CURRENT_VERSION = '1.1.82';
+// Single source of truth for the installed version: package.json. The pkg
+// bundler includes package.json in the snapshot, so this works both in dev
+// and packaged builds. Bumping package.json is the only place to update the
+// version for the backend; the frontend reads it from /api/version/check.
+const CURRENT_VERSION = require('../package.json').version;
 const VERSION_CHECK_URL = 'https://monad-code.com/version.json';
 
 // ── Helpers ─────────────────────────────────────────
@@ -218,12 +224,17 @@ router.post('/scripts', (req, res) => {
     return res.status(400).json({ error: 'Script file not found at specified path' });
   }
 
+  const settings = req.db.settings || {};
+  const defaultTimeout = Number.isFinite(Number(settings.defaultTimeoutSeconds))
+    ? Number(settings.defaultTimeoutSeconds)
+    : 300;
+
   const script = {
     id: uuidv4(),
     name,
     path: resolvedPath,
     description: description || '',
-    timeoutSeconds: timeoutSeconds || 300,
+    timeoutSeconds: timeoutSeconds != null ? timeoutSeconds : defaultTimeout,
     createdAt: new Date().toISOString()
   };
 
@@ -427,6 +438,50 @@ router.get('/stats', (req, res) => {
   });
 });
 
+// ── Secrets ──────────────────────────────────────────
+
+router.get('/secrets', (req, res) => {
+  try {
+    res.json(secrets.list());
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/secrets', async (req, res) => {
+  const { name, value } = req.body || {};
+  try {
+    const entry = await secrets.set(name, value);
+    res.status(201).json(entry);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.delete('/secrets/:name', (req, res) => {
+  try {
+    const removed = secrets.remove(req.params.name);
+    if (!removed) return res.status(404).json({ error: 'Secret not found' });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// ── Logs (daemon stdout/stderr tail) ─────────────────
+
+router.get('/logs', (req, res) => {
+  const after = parseInt(req.query.after, 10) || 0;
+  const entries = logs.read(after);
+  const lastId = entries.length > 0 ? entries[entries.length - 1].id : after;
+  res.json({ entries, cursor: lastId });
+});
+
+router.delete('/logs', (req, res) => {
+  logs.clear();
+  res.json({ ok: true });
+});
+
 // ── Version check & update ──────────────────────────
 
 function compareVersions(a, b) {
@@ -442,6 +497,16 @@ function compareVersions(a, b) {
 }
 
 router.get('/version/check', async (req, res) => {
+  const settings = req.db.settings || {};
+  if (settings.autoUpdateCheck === false) {
+    return res.json({
+      currentVersion: CURRENT_VERSION,
+      latestVersion: CURRENT_VERSION,
+      updateAvailable: false,
+      msiUrl: '',
+      disabled: true,
+    });
+  }
   try {
     const response = await fetch(VERSION_CHECK_URL, { signal: AbortSignal.timeout(10000) });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);

@@ -4,7 +4,7 @@
   <Package
     Name="Monad Code"
     Manufacturer="MonadCode"
-    Version="1.1.82"
+    Version="1.2.0"
     UpgradeCode="28DDDB00-5F30-4944-893A-A2526C2B0D7A"
     InstallerVersion="500"
     Scope="perMachine">
@@ -56,10 +56,10 @@
 
     </ComponentGroup>
 
-    <!-- Data folder (preserved on uninstall) -->
+    <!-- Data folder — kept during MSI upgrades, wiped on true uninstall
+         (see WipeUserData custom action below). -->
     <Component Id="DataFolder" Directory="DATAFOLDER"
-               Guid="92764727-DC83-4EF9-85E2-BAC09EF0964B"
-               Permanent="yes">
+               Guid="92764727-DC83-4EF9-85E2-BAC09EF0964B">
       <CreateFolder />
     </Component>
 
@@ -109,6 +109,17 @@
                   Impersonate="no"
                   Return="ignore" />
 
+    <!-- Silent wipe of user data + winsw logs on true uninstall.
+         Deletes: data\ (scripts, schedules, history, settings, secrets)
+         and MonadCode-svc.*.log files dropped by winsw in INSTALLFOLDER.
+         Gated so MSI upgrades (which run uninstall internally) preserve data. -->
+    <CustomAction Id="WipeUserData"
+                  Directory="INSTALLFOLDER"
+                  ExeCommand='cmd.exe /c rmdir /s /q "[DATAFOLDER]" &amp; del /q "[INSTALLFOLDER]MonadCode-svc*.log" "[INSTALLFOLDER]MonadCode-svc*.log.*"'
+                  Execute="deferred"
+                  Impersonate="no"
+                  Return="ignore" />
+
     <InstallExecuteSequence>
       <!-- Install: register then start (after files land on disk) -->
       <Custom Action="InstallService" After="InstallFiles"
@@ -121,6 +132,11 @@
               Condition='REMOVE="ALL"' />
       <Custom Action="UninstallService" After="StopService"
               Condition='REMOVE="ALL"' />
+      <!-- Wipe user data on TRUE uninstall only (not during MSI upgrades).
+           UPGRADINGPRODUCTCODE is set by MajorUpgrade during an upgrade's
+           uninstall phase, so this condition skips the wipe in that case. -->
+      <Custom Action="WipeUserData" After="UninstallService"
+              Condition='REMOVE="ALL" AND NOT UPGRADINGPRODUCTCODE' />
     </InstallExecuteSequence>
 
     <!-- Feature -->

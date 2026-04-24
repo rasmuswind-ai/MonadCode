@@ -1,30 +1,113 @@
 @import "tailwindcss";
 
-@theme {
-  --color-bg: #0f1117;
-  --color-surface: #070409;
-  --color-surface2: #0F0A0B;
-  --color-border: #2e3144;
-  --color-text: #e1e4ed;
-  --color-dim: #8b8fa3;
-  --color-primary: #A6A09B;
-  --color-primary-hover: #d5cec8;
-  --color-success: #34d399;
-  --color-danger: #f87171;
-  --color-warning: #fbbf24;
-  --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --font-mono: 'Cascadia Code', 'Consolas', monospace;
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+  --bg: #eef0f4;
+  --panel: #ffffff;
+  --panel-soft: #f5f6f9;
+  --ink: #111214;
+  --ink-2: #3a3d45;
+  --muted: #8a8f99;
+  --line: #e7e9ee;
+  --accent: #a6ff4d;
+  --ok: #4dd39a;
+  --ok-strong: #2f9d6a;
+  --ok-soft: #e6f7ee;
+  --danger: #ff6b7e;
+  --danger-strong: #c23b50;
+  --danger-soft: #ffe5e9;
+  --warn: #d97706;
+  --warn-soft: #fef3c7;
+  --info: #8fb3ff;
+  --pill: #eef1f6;
+  --on-ink: #ffffff;
+  --scrollbar-thumb: #d7dae0;
+  --scrollbar-thumb-hover: #c2c5cc;
+  --chart-axis: #d7dae0;
+  --chart-grid: #eef0f4;
+}
+
+html.dark {
+  color-scheme: dark;
+  --bg: #0e1013;
+  --panel: #17191d;
+  --panel-soft: #1d2026;
+  --ink: #f1f2f4;
+  --ink-2: #c4c7cf;
+  --muted: #8a8f99;
+  --line: #2a2d33;
+  --accent: #a6ff4d;
+  --ok: #4dd39a;
+  --ok-strong: #4dd39a;
+  --ok-soft: rgba(77, 211, 154, 0.14);
+  --danger: #ff6b7e;
+  --danger-strong: #ff8a99;
+  --danger-soft: rgba(255, 107, 126, 0.14);
+  --warn: #f5b74d;
+  --warn-soft: rgba(245, 183, 77, 0.14);
+  --info: #8fb3ff;
+  --pill: #23262c;
+  --on-ink: #0e1013;
+  --scrollbar-thumb: #3a3d45;
+  --scrollbar-thumb-hover: #4d5159;
+  --chart-axis: #3a3d45;
+  --chart-grid: #23262c;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel-soft: var(--panel-soft);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-ok: var(--ok);
+  --color-ok-strong: var(--ok-strong);
+  --color-ok-soft: var(--ok-soft);
+  --color-danger: var(--danger);
+  --color-danger-strong: var(--danger-strong);
+  --color-danger-soft: var(--danger-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-info: var(--info);
+  --color-pill: var(--pill);
+  --color-on-ink: var(--on-ink);
+
+  --font-sans: "Inter", -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "SF Mono", "JetBrains Mono", Consolas, Menlo, monospace;
+
+  --radius-card: 22px;
+  --radius-card-sm: 14px;
+
+  --shadow-card: 0 1px 2px rgba(20, 22, 28, 0.04), 0 8px 24px rgba(20, 22, 28, 0.05);
+  --shadow-card-sm: 0 1px 2px rgba(20, 22, 28, 0.04);
+}
+
+html.dark {
+  --tw-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 body {
-  @apply bg-bg text-text font-sans min-h-screen;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  min-height: 100vh;
 }
 
 select option {
-  background: #1c1c1c;
-  color: #d6d3d1;
+  background: var(--panel);
+  color: var(--ink);
 }
 
+/* Toggle switch */
 .toggle {
   @apply relative inline-block w-10 h-[22px];
 }
@@ -32,52 +115,67 @@ select option {
   @apply opacity-0 w-0 h-0 absolute;
 }
 .toggle .slider {
-  @apply absolute inset-0 bg-surface2 rounded-full cursor-pointer transition-all duration-200 border border-border;
+  position: absolute;
+  inset: 0;
+  background: var(--panel-soft);
+  border: 1px solid var(--line);
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 200ms;
 }
 .toggle .slider::before {
-  content: '';
-  @apply absolute w-4 h-4 left-0.5 top-0.5 bg-dim rounded-full transition-all duration-200;
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: 2px;
+  top: 2px;
+  background: var(--muted);
+  border-radius: 9999px;
+  transition: all 200ms;
 }
 .toggle input:checked + .slider {
-  @apply bg-green-500;
+  background: var(--ok);
+  border-color: var(--ok);
 }
 .toggle input:checked + .slider::before {
-  @apply translate-x-[18px] bg-white;
+  transform: translateX(18px);
+  background: #ffffff;
 }
 
+/* Animations */
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
-
 .animate-shimmer {
   animation: shimmer 4s ease-in-out infinite;
 }
 
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.animate-slide-in-left {
+  animation: slideInLeft 0.28s ease-out both;
+}
+
+/* Scrollbars */
 *::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
-
 *::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
+  background: transparent;
 }
-
 *::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--scrollbar-thumb);
   border-radius: 4px;
 }
-
 *::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--scrollbar-thumb-hover);
 }
-
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+  scrollbar-color: var(--scrollbar-thumb) transparent;
 }

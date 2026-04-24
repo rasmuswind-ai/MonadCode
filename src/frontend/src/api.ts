@@ -1,4 +1,4 @@
-import type { Script, Schedule, HistoryEntry, Stats, ChartDataPoint, BrowseResult, Settings, TreeEntry } from './types';
+import type { Script, Schedule, HistoryEntry, Stats, ChartDataPoint, BrowseResult, Settings, TreeEntry, SecretEntry, LogsResponse } from './types';
 
 const BASE = '/api';
 
@@ -72,4 +72,15 @@ export const api = {
     request<{ currentVersion: string; latestVersion: string; updateAvailable: boolean; msiUrl: string }>('/version/check'),
   installUpdate: () =>
     request<{ ok: boolean; message: string }>('/version/update', { method: 'POST' }),
+
+  // Secrets (values are never returned — write-only)
+  listSecrets: () => request<SecretEntry[]>('/secrets'),
+  setSecret: (name: string, value: string) =>
+    request<SecretEntry>('/secrets', { method: 'POST', body: JSON.stringify({ name, value }) }),
+  deleteSecret: (name: string) =>
+    request<{ ok: boolean }>(`/secrets/${encodeURIComponent(name)}`, { method: 'DELETE' }),
+
+  // Daemon logs (circular buffer, poll with cursor)
+  getLogs: (after = 0) => request<LogsResponse>(`/logs?after=${after}`),
+  clearLogs: () => request<{ ok: boolean }>('/logs', { method: 'DELETE' }),
 };
